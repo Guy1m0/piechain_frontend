@@ -1,4 +1,4 @@
-package piechain
+package cclib
 
 import (
 	"context"
@@ -30,13 +30,13 @@ func WaitTx(client *ethclient.Client, hash common.Hash) (bool, error) {
 	}
 }
 
-func NewTransactor(keyfile string) (*bind.TransactOpts, error) {
+func NewTransactor(keyfile, password string) (*bind.TransactOpts, error) {
 	f, err := os.Open(keyfile)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	auth, err := bind.NewTransactor(f, "password")
+	auth, err := bind.NewTransactor(f, password)
 	if err != nil {
 		return nil, err
 	}
