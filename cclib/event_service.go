@@ -96,7 +96,7 @@ func (svc *EventService) listenKafkaConsumer(consumer *consumergroup.ConsumerGro
 }
 
 func (svc *EventService) topics() []string {
-	result := make([]string, len(svc.handlers))
+	result := make([]string, 0, len(svc.handlers))
 	for event := range svc.handlers {
 		result = append(result, event)
 	}

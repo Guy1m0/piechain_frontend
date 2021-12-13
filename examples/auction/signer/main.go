@@ -40,7 +40,7 @@ func main() {
 
 	eventService, err = cclib.NewEventService(
 		strings.Split(zkNodes, ","),
-		fmt.Sprintf("signer/%s/%s", platform, signerID),
+		fmt.Sprintf("signer-%s-%s", platform, signerID),
 	)
 	check(err)
 
