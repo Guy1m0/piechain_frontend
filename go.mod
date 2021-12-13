@@ -1,4 +1,4 @@
-module pie-chain
+module github.com/aungmawjj/pie-chain
 
 go 1.16
 
