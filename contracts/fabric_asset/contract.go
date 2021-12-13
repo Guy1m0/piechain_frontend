@@ -1,23 +1,12 @@
-package main
+package fabric_asset
 
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
-
-func main() {
-	cc, err := contractapi.NewChaincode(&SmartContract{})
-	if err != nil {
-		log.Panicf("Error creating chaincode: %v", err)
-	}
-
-	if err := cc.Start(); err != nil {
-		log.Panicf("Error starting chaincode: %v", err)
-	}
-}
 
 type SmartContract struct {
 	contractapi.Contract
@@ -28,40 +17,6 @@ const (
 	KeyAuctions      = "auctions"
 	KeyLastAuctionID = "lastAuction"
 )
-
-type Asset struct {
-	ID               string
-	Owner            string
-	PendingAuctionID int
-}
-
-type Auction struct {
-	ID              int
-	AssetID         string
-	Platforms       []string
-	CrossAuctionIDs []string
-	Status          string
-
-	HighestBid         int
-	HighestBidder      string
-	HighestBidPlatform string
-}
-
-type StartAuctionArgs struct {
-	AssetID   string
-	Platforms []string
-}
-
-type BindAuctionArgs struct {
-	AuctionID       int
-	CrossAuctionIDs []string
-}
-
-type EndAuctionArgs struct {
-	AuctionID      int
-	HighestBids    []int
-	HighestBidders []string
-}
 
 func (cc *SmartContract) AddAsset(
 	ctx contractapi.TransactionContextInterface, id, owner string,
@@ -74,10 +29,10 @@ func (cc *SmartContract) AddAsset(
 }
 
 func (cc *SmartContract) StartAuction(
-	ctx contractapi.TransactionContextInterface, argJSON string,
+	ctx contractapi.TransactionContextInterface, argjson string,
 ) error {
 	var args StartAuctionArgs
-	err := json.Unmarshal([]byte(argJSON), &args)
+	err := json.Unmarshal([]byte(argjson), &args)
 	if err != nil {
 		return err
 	}
@@ -95,11 +50,11 @@ func (cc *SmartContract) StartAuction(
 		return err
 	}
 	auction := Auction{
-		ID:              lastID + 1,
-		AssetID:         args.AssetID,
-		Platforms:       args.Platforms,
-		CrossAuctionIDs: make([]string, len(args.Platforms)),
-		Status:          "Started",
+		ID:         lastID + 1,
+		AssetID:    args.AssetID,
+		EthAddr:    args.EthAddr,
+		QuorumAddr: args.QuorumAddr,
+		Status:     "Started",
 	}
 	err = cc.setAuction(ctx, &auction)
 	if err != nil {
@@ -114,24 +69,7 @@ func (cc *SmartContract) StartAuction(
 	return cc.setAsset(ctx, asset)
 }
 
-func (cc *SmartContract) BindAuction(
-	ctx contractapi.TransactionContextInterface, argJSON string,
-) error {
-	var args BindAuctionArgs
-	err := json.Unmarshal([]byte(argJSON), &args)
-	if err != nil {
-		return err
-	}
-	auction, err := cc.GetAuction(ctx, args.AuctionID)
-	if err != nil {
-		return err
-	}
-	auction.Status = "Bind"
-	auction.CrossAuctionIDs = args.CrossAuctionIDs
-	return cc.setAuction(ctx, auction)
-}
-
-func (cc *SmartContract) SetAuctionEnding(
+func (cc *SmartContract) EndAuction(
 	ctx contractapi.TransactionContextInterface, assetID string,
 ) error {
 	asset, err := cc.GetAsset(ctx, assetID)
@@ -145,26 +83,45 @@ func (cc *SmartContract) SetAuctionEnding(
 	auction.Status = "Ending"
 	return cc.setAuction(ctx, auction)
 }
-func (cc *SmartContract) EndAuction(
-	ctx contractapi.TransactionContextInterface, argJSON string,
-) error {
 
-	var args EndAuctionArgs
-	err := json.Unmarshal([]byte(argJSON), &args)
+func (cc *SmartContract) FinalizeAuction(
+	ctx contractapi.TransactionContextInterface, argjson string,
+) error {
+	var args FinalizeAuctionArgs
+	err := json.Unmarshal([]byte(argjson), &args)
 	if err != nil {
 		return err
 	}
+
 	auction, err := cc.GetAuction(ctx, args.AuctionID)
 	if err != nil {
 		return err
 	}
 
-	for idx, bid := range args.HighestBids {
-		if bid > auction.HighestBid {
-			auction.HighestBid = bid
-			auction.HighestBidPlatform = auction.Platforms[idx]
-			auction.HighestBidder = args.HighestBidders[idx]
-		}
+	addrs, min := cc.ethAddrs()
+	if !cc.verifyAuctionResult(addrs, min, args.EthResult) {
+		return fmt.Errorf("invalid ethereum result")
+	}
+	addrs, min = cc.quorumAddrs()
+	if !cc.verifyAuctionResult(addrs, min, args.EthResult) {
+		return fmt.Errorf("invalid quorum result")
+	}
+
+	if args.EthResult.AuctionAddr != auction.EthAddr {
+		return fmt.Errorf("invalid ethereum address")
+	}
+	if args.QuorumResult.AuctionAddr != auction.QuorumAddr {
+		return fmt.Errorf("invalid quorum address")
+	}
+
+	if args.EthResult.HighestBid >= args.QuorumResult.HighestBid {
+		auction.HighestBid = args.EthResult.HighestBid
+		auction.HighestBidder = args.EthResult.HighestBidder
+		auction.HighestBidPlatform = "ethereum"
+	} else {
+		auction.HighestBid = args.EthResult.HighestBid
+		auction.HighestBidder = args.EthResult.HighestBidder
+		auction.HighestBidPlatform = "quorum"
 	}
 
 	auction.Status = "Ended"
@@ -185,6 +142,37 @@ func (cc *SmartContract) EndAuction(
 		return err
 	}
 	return nil
+}
+
+func (cc *SmartContract) ethAddrs() (addrs []string, min int) {
+	return []string{
+		"",
+		"",
+		"",
+		"",
+	}, 2
+}
+
+func (cc *SmartContract) quorumAddrs() (addrs []string, min int) {
+	return []string{
+		"",
+		"",
+		"",
+		"",
+	}, 2
+}
+
+func (cc *SmartContract) verifyAuctionResult(
+	trustedAddrs []string, majority int, result CrossChainAuctionResult,
+) bool {
+	if len(result.Signatures) < majority {
+		return false
+	}
+	addrs := make([]common.Address, 0, len(trustedAddrs))
+	for _, addr := range trustedAddrs {
+		addrs = append(addrs, common.HexToAddress(addr))
+	}
+	return VerifyKnownSignatures(result.Hash(), result.Signatures, addrs)
 }
 
 func (cc *SmartContract) GetAsset(

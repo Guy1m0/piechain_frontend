@@ -1,8 +1,8 @@
 package cclib
 
 import (
-	"io"
 	"io/ioutil"
+	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
@@ -13,8 +13,13 @@ type Signer struct {
 	privkey *keystore.Key
 }
 
-func NewSigner(keyin io.Reader, password string) (*Signer, error) {
-	keyjson, err := ioutil.ReadAll(keyin)
+func NewSigner(keyfile, password string) (*Signer, error) {
+	f, err := os.Open(keyfile)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	keyjson, err := ioutil.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
