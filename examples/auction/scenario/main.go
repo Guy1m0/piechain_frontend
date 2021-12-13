@@ -22,7 +22,7 @@ var ethClient *ethclient.Client
 var quorumClient *ethclient.Client
 var assetClient *auction.AssetClient
 
-func ThreeChainAuction() {
+func main() {
 	var err error
 	ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s:8545", "localhost"))
 	check(err)
@@ -49,10 +49,10 @@ func ThreeChainAuction() {
 	myAuction = startAuction(asset.ID, ethAddr, quorumAddr)
 
 	fmt.Println("[ethereum] Bidding auction")
-	bidAuction(ethClient, myAuction.EthAddr, "keys/key1", 500)
+	bidAuction(ethClient, myAuction.EthAddr, "../../keys/key1", 500)
 
 	fmt.Println("[quorum] Bidding auction")
-	bidAuction(quorumClient, myAuction.QuorumAddr, "keys/key2", 1000)
+	bidAuction(quorumClient, myAuction.QuorumAddr, "../../keys/key2", 1000)
 
 	fmt.Println("[fabric] Ending auction")
 	endAuction(myAuction)
@@ -141,7 +141,7 @@ func deployCrossChainAuction(client *ethclient.Client) string {
 	auth, err := cclib.NewTransactor("../../keys/key0", "password")
 	check(err)
 
-	addr, tx, _, err := eth_auction.DeployAuction(auth, ethClient)
+	addr, tx, _, err := eth_auction.DeployAuction(auth, client)
 	check(err)
 
 	success, err := cclib.WaitTx(client, tx.Hash())

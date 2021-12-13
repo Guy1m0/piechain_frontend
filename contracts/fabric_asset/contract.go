@@ -146,19 +146,17 @@ func (cc *SmartContract) FinalizeAuction(
 
 func (cc *SmartContract) ethAddrs() (addrs []string, min int) {
 	return []string{
-		"",
-		"",
-		"",
-		"",
+		"17dc6ca2e1c84ae4107975a48dfd05831b8addff",
+		"ac5580ad28a3c0e044a52541785bfd34c753d3bf",
+		"d0a73fe9d44184e9f1264ce2097064212e67ebfe",
 	}, 2
 }
 
 func (cc *SmartContract) quorumAddrs() (addrs []string, min int) {
 	return []string{
-		"",
-		"",
-		"",
-		"",
+		"17dc6ca2e1c84ae4107975a48dfd05831b8addff",
+		"ac5580ad28a3c0e044a52541785bfd34c753d3bf",
+		"d0a73fe9d44184e9f1264ce2097064212e67ebfe",
 	}, 2
 }
 

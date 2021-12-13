@@ -40,6 +40,6 @@ func NewTransactor(keyfile, password string) (*bind.TransactOpts, error) {
 	if err != nil {
 		return nil, err
 	}
-	auth.GasLimit = 10000000000
+	auth.GasLimit = 100000000
 	return auth, nil
 }

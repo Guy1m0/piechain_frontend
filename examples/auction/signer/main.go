@@ -26,6 +26,7 @@ var (
 func main() {
 	flag.StringVar(&zkNodes, "zk", zkNodes, "comma separated zoolkeeper nodes")
 	flag.StringVar(&ethEndpoint, "eth", ethEndpoint, "eth endpoint")
+	flag.StringVar(&platform, "p", platform, "platform")
 	flag.StringVar(&signerID, "id", signerID, "signer id")
 	flag.StringVar(&keyfile, "key", keyfile, "private key file")
 	flag.Parse()
