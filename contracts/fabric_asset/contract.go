@@ -1,4 +1,4 @@
-package fabric_asset
+package asset
 
 import (
 	"encoding/json"
@@ -119,8 +119,8 @@ func (cc *SmartContract) FinalizeAuction(
 		auction.HighestBidder = args.EthResult.HighestBidder
 		auction.HighestBidPlatform = "ethereum"
 	} else {
-		auction.HighestBid = args.EthResult.HighestBid
-		auction.HighestBidder = args.EthResult.HighestBidder
+		auction.HighestBid = args.QuorumResult.HighestBid
+		auction.HighestBidder = args.QuorumResult.HighestBidder
 		auction.HighestBidPlatform = "quorum"
 	}
 

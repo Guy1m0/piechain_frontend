@@ -11,8 +11,8 @@ import (
 var (
 	zkNodes = "localhost:2181"
 
-	assetClient  *auction.AssetClient
-	eventService *cclib.EventService
+	assetClient *auction.AssetClient
+	ccsvc       *cclib.CCService
 
 	auctionResults map[int]*auction.FinalizeAuctionArgs
 )
@@ -23,12 +23,14 @@ func main() {
 
 	var err error
 	assetClient = auction.NewAssetClient()
-	eventService, err = cclib.NewEventService(strings.Split(zkNodes, ","), "relayer")
+	ccsvc, err = cclib.NewEventService(strings.Split(zkNodes, ","), "relayer")
 	check(err)
 
-	eventService.Register(auction.SignedAuctionResultEvent, handleSignedAuctionResult)
+	auctionResults = make(map[int]*auction.FinalizeAuctionArgs)
 
-	err = eventService.Start()
+	ccsvc.Register(auction.SignedAuctionResultEvent, handleSignedAuctionResult)
+
+	err = ccsvc.Start()
 	check(err)
 
 	runAuctionListener()

@@ -1,4 +1,4 @@
-package fabric_asset
+package asset
 
 import (
 	"strconv"

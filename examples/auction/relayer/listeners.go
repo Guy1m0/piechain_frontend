@@ -23,7 +23,7 @@ func onNewAuction(a *auction.Auction) {
 
 func onAuctionEnding(a *auction.Auction) {
 	b, _ := json.Marshal(a)
-	eventService.Publish(auction.AuctionEndingEvent, b)
+	ccsvc.Publish(auction.AuctionEndingEvent, b)
 }
 
 func listenNewAuction() *auction.Auction {

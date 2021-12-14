@@ -46,5 +46,5 @@ func handleAuctionEnding(payload []byte) {
 	check(err)
 
 	b, _ := json.Marshal(signed)
-	eventService.Publish(auction.SignedAuctionResultEvent, b)
+	ccsvc.Publish(auction.SignedAuctionResultEvent, b)
 }

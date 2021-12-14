@@ -12,7 +12,7 @@ import (
 
 type EventHandler func(payload []byte)
 
-type EventService struct {
+type CCService struct {
 	serviceID string
 	zkNodes   []string
 
@@ -21,8 +21,8 @@ type EventService struct {
 	handlers map[string]EventHandler
 }
 
-func NewEventService(zkNodes []string, serviceID string) (*EventService, error) {
-	svc := &EventService{
+func NewEventService(zkNodes []string, serviceID string) (*CCService, error) {
+	svc := &CCService{
 		serviceID: serviceID,
 		zkNodes:   zkNodes,
 		handlers:  make(map[string]EventHandler),
@@ -34,11 +34,11 @@ func NewEventService(zkNodes []string, serviceID string) (*EventService, error) 
 	return svc, nil
 }
 
-func (svc *EventService) Register(event string, handler EventHandler) {
+func (svc *CCService) Register(event string, handler EventHandler) {
 	svc.handlers[event] = handler
 }
 
-func (svc *EventService) Publish(event string, payload []byte) error {
+func (svc *CCService) Publish(event string, payload []byte) error {
 	message := &sarama.ProducerMessage{Topic: event}
 	message.Value = sarama.ByteEncoder(payload)
 	_, _, err := svc.kafkaProducer.SendMessage(message)
@@ -49,7 +49,7 @@ func (svc *EventService) Publish(event string, payload []byte) error {
 	return nil
 }
 
-func (svc *EventService) setupKafkaProducer() error {
+func (svc *CCService) setupKafkaProducer() error {
 	kbConn, err := kb.NewConn(svc.zkNodes)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (svc *EventService) setupKafkaProducer() error {
 	return err
 }
 
-func (svc *EventService) Start() error {
+func (svc *CCService) Start() error {
 	config := consumergroup.NewConfig()
 	config.Offsets.Initial = sarama.OffsetNewest
 	config.Offsets.ProcessingTimeout = 10 * time.Second
@@ -85,7 +85,7 @@ func (svc *EventService) Start() error {
 	return nil
 }
 
-func (svc *EventService) listenKafkaConsumer(consumer *consumergroup.ConsumerGroup) {
+func (svc *CCService) listenKafkaConsumer(consumer *consumergroup.ConsumerGroup) {
 	for message := range consumer.Messages() {
 		if handler, ok := svc.handlers[message.Topic]; ok {
 			log.Printf("Received event: %s\n", message.Topic)
@@ -95,7 +95,7 @@ func (svc *EventService) listenKafkaConsumer(consumer *consumergroup.ConsumerGro
 	}
 }
 
-func (svc *EventService) topics() []string {
+func (svc *CCService) topics() []string {
 	result := make([]string, 0, len(svc.handlers))
 	for event := range svc.handlers {
 		result = append(result, event)

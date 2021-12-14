@@ -18,9 +18,9 @@ var (
 	keyfile     = "../../keys/key1"
 	keypassword = "password"
 
-	eventService *cclib.EventService
-	ethClient    *ethclient.Client
-	signer       *cclib.Signer
+	ccsvc     *cclib.CCService
+	ethClient *ethclient.Client
+	signer    *cclib.Signer
 )
 
 func main() {
@@ -39,15 +39,15 @@ func main() {
 	signer, err = cclib.NewSigner(keyfile, keypassword)
 	check(err)
 
-	eventService, err = cclib.NewEventService(
+	ccsvc, err = cclib.NewEventService(
 		strings.Split(zkNodes, ","),
 		fmt.Sprintf("signer-%s-%s", platform, signerID),
 	)
 	check(err)
 
-	eventService.Register(auction.AuctionEndingEvent, handleAuctionEnding)
+	ccsvc.Register(auction.AuctionEndingEvent, handleAuctionEnding)
 
-	err = eventService.Start()
+	err = ccsvc.Start()
 	check(err)
 
 	select {}

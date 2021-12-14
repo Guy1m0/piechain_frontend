@@ -1,4 +1,4 @@
-module github.com/aungmawjj/pie-chain/contracts/fabric_asset
+module asset
 
 go 1.16
 
