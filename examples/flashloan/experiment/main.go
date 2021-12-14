@@ -29,7 +29,7 @@ func testToken() {
 	printBalance(token1, account1)
 	printBalance(token1, account2)
 
-	fmt.Println("transfer balance...")
+	fmt.Println("transfer balance 200")
 	_, err = token1.SubmitTransaction("Transfer", account1, account2, "200")
 	check(err)
 	time.Sleep(3 * time.Second)
@@ -71,7 +71,8 @@ func testAMM() {
 
 	printAMMRate(amm1)
 
-	_, err = amm1.SubmitTransaction("Exchange", alice, "1000")
+	fmt.Println("exchange 1000 token1 -> token2")
+	_, err = amm1.SubmitTransaction("Exchange", alice, "1", "1000")
 	check(err)
 
 	time.Sleep(3 * time.Second)

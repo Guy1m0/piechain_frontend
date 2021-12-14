@@ -40,6 +40,9 @@ func (sc *SmartContract) GetBalance(
 	if err != nil {
 		return 0, err
 	}
+	if b == nil {
+		return 0, nil
+	}
 	var value int64
 	err = json.Unmarshal(b, &value)
 	return value, err
