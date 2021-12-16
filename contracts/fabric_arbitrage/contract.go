@@ -192,7 +192,7 @@ func (sc *SmartContract) transferToken(
 		[]byte(fmt.Sprint(amount)),
 	}, "mychannel")
 	if resp.Status != shim.OK {
-		return fmt.Errorf("failed to transfer %s", tokenName)
+		return fmt.Errorf("failed to transfer %s, %s", tokenName, resp.Message)
 	}
 	return nil
 }

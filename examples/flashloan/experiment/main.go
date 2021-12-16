@@ -117,9 +117,6 @@ func testFullApp() {
 	fmt.Println("exchange balance")
 	printBalance(token1, excT.From.Hex())
 
-	fmt.Println("exchange balance")
-	printBalance(token1, excT.From.Hex())
-
 	fmt.Println("arbitrage balance")
 	printBalance(token1, arbitT.From.Hex())
 
