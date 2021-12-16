@@ -21,15 +21,14 @@ func main() {
 	flag.StringVar(&zkNodes, "zk", zkNodes, "comma separated zoolkeeper nodes")
 	flag.Parse()
 
-	var err error
+	auctionResults = make(map[int]*auction.FinalizeAuctionArgs)
 	assetClient = auction.NewAssetClient()
+
+	var err error
+
 	ccsvc, err = cclib.NewEventService(strings.Split(zkNodes, ","), "relayer")
 	check(err)
-
-	auctionResults = make(map[int]*auction.FinalizeAuctionArgs)
-
 	ccsvc.Register(auction.SignedAuctionResultEvent, handleSignedAuctionResult)
-
 	err = ccsvc.Start()
 	check(err)
 
