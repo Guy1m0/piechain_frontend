@@ -62,12 +62,19 @@ func testFullApp() {
 	lenderT, err := cclib.NewTransactor(lenderKey, password)
 	check(err)
 
+	arbitT, err := cclib.NewTransactor(arbitKey, password)
+	check(err)
+
 	tx, err = token.Transfer(excT, lenderT.From, big.NewInt(10_000))
 	check(err)
 
 	success, err = cclib.WaitTx(ethClient, tx.Hash())
 	check(err)
 	printTxStatus(success)
+
+	balbig, err := token.BalanceOf(&bind.CallOpts{}, lenderT.From)
+	check(err)
+	fmt.Println("lender balance: ", balbig.Int64())
 
 	token1 := flashloan.NewChaincode(token1Name)
 	token2 := flashloan.NewChaincode(token2Name)
@@ -96,13 +103,16 @@ func testFullApp() {
 
 	_, err = token1.SubmitTransaction("SetBalance", excT.From.Hex(), "10000000")
 	check(err)
-	time.Sleep(5 * time.Second)
+	time.Sleep(3 * time.Second)
+
+	fmt.Println("exchange balance")
+	printBalance(token1, excT.From.Hex())
+
+	fmt.Println("arbitrage balance")
+	printBalance(token1, arbitT.From.Hex())
 
 	printAMMRate(amm1)
 	printAMMRate(amm2)
-
-	arbitT, err := cclib.NewTransactor(arbitKey, password)
-	check(err)
 
 	fmt.Println("setup")
 
@@ -126,6 +136,10 @@ func testFullApp() {
 
 	lenderContract, err := eth_lender.NewLender(lenderAddr, ethClient)
 	check(err)
+
+	tokenAddr_, err := lenderContract.TokenAddress(&bind.CallOpts{})
+	check(err)
+	fmt.Println("token address: ", tokenAddr_.Hex())
 
 	tx, err = lenderContract.Setup(
 		arbitT, lenderT.From, arbitT.From, excT.From,
@@ -154,13 +168,17 @@ func testFullApp() {
 	check(err)
 	printTxStatus(success)
 
+	allowance, err := token.Allowance(&bind.CallOpts{}, lenderT.From, excT.From)
+	check(err)
+	fmt.Println("Allowance: ", allowance.Int64())
+
 	tx, err = lenderContract.Initialize(lenderT, 0, [32]byte{}, [32]byte{}, 0, [32]byte{}, [32]byte{})
 	check(err)
 	success, err = cclib.WaitTx(ethClient, tx.Hash())
 	check(err)
 	printTxStatus(success)
 
-	balbig, err := token.BalanceOf(&bind.CallOpts{}, lenderT.From)
+	balbig, err = token.BalanceOf(&bind.CallOpts{}, lenderT.From)
 	check(err)
 	fmt.Println("lender balance: ", balbig.Int64())
 

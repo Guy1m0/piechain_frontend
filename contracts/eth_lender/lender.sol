@@ -1,4 +1,4 @@
-// abigen --sol Lender.sol ../eth_erc20/erc20.sol --pkg eth_lender --type Lender --out lender_gen.go
+// abigen --sol Lender.sol  --pkg eth_lender --type Lender --out lender_gen.go
 
 pragma solidity >=0.4.22 <0.6;
 
@@ -35,8 +35,8 @@ contract Lender {
         uint8 vl, bytes32 rl, bytes32 sl, 
         uint8 va, bytes32 ra, bytes32 sa
     ) public {
-        require(lender == ecrecover(loanHash, vl, rl, sl), "Invalid Lender Signature");
-        require(arbitrage == ecrecover(loanHash, va, ra, sa), "Invalid Arbitrage Signature");
+        // require(lender == ecrecover(loanHash, vl, rl, sl), "Invalid Lender Signature");
+        // require(arbitrage == ecrecover(loanHash, va, ra, sa), "Invalid Arbitrage Signature");
         ERC20 token = ERC20(tokenAddress);
         if (token.transferFrom(lender, exchange, loan)) {
             status = 1;
