@@ -26,15 +26,15 @@ const (
 	amm2Name   = "amm2"
 	arbitName  = "arbitrage"
 
-	amm1Account = "amm1_acc"
-	amm2Account = "amm2_acc"
+	amm1Account = "amm1"
+	amm2Account = "amm2"
 )
 
 var ethClient *ethclient.Client
 
 func main() {
 	// testToken()
-	testAMM()
+	// testAMM()
 	testFullApp()
 }
 

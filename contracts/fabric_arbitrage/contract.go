@@ -174,7 +174,7 @@ func (sc *SmartContract) exchange(
 		[]byte(fmt.Sprint(amount)),
 	}, "mychannel")
 	if resp.Status != shim.OK {
-		return 0, fmt.Errorf("failed to exchange %s", amm)
+		return 0, fmt.Errorf("failed to exchange %s, %s", amm, resp.Message)
 	}
 	var result int64
 	err := json.Unmarshal(resp.Payload, &result)
