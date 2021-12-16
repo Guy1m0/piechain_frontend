@@ -106,6 +106,10 @@ func testFullApp() {
 
 	_, err = token1.SubmitTransaction("SetBalance", arbitT.From.Hex(), "0")
 	check(err)
+
+	_, err = token2.SubmitTransaction("SetBalance", arbitT.From.Hex(), "0")
+	check(err)
+
 	time.Sleep(3 * time.Second)
 
 	printBalance(token1, amm1Account)
