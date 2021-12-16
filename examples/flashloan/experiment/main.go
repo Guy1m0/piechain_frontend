@@ -81,19 +81,9 @@ func testFullApp() {
 	amm1 := flashloan.NewChaincode(amm1Name)
 	amm2 := flashloan.NewChaincode(amm2Name)
 
-	_, err = token1.SubmitTransaction("SetBalance", amm1Account, "10000000")
-	check(err)
-	_, err = token2.SubmitTransaction("SetBalance", amm1Account, "15000000")
-	check(err)
-
 	_, err = amm1.SubmitTransaction("SetAccount", amm1Account)
 	check(err)
 	_, err = amm1.SubmitTransaction("SetRate", "1.5")
-	check(err)
-
-	_, err = token1.SubmitTransaction("SetBalance", amm2Account, "11000000")
-	check(err)
-	_, err = token2.SubmitTransaction("SetBalance", amm2Account, "10000000")
 	check(err)
 
 	_, err = amm2.SubmitTransaction("SetAccount", amm2Account)
@@ -101,9 +91,31 @@ func testFullApp() {
 	_, err = amm2.SubmitTransaction("SetRate", "1")
 	check(err)
 
+	_, err = token1.SubmitTransaction("SetBalance", amm1Account, "10000000")
+	check(err)
+	_, err = token2.SubmitTransaction("SetBalance", amm1Account, "15000000")
+	check(err)
+
+	_, err = token1.SubmitTransaction("SetBalance", amm2Account, "11000000")
+	check(err)
+	_, err = token2.SubmitTransaction("SetBalance", amm2Account, "10000000")
+	check(err)
+
 	_, err = token1.SubmitTransaction("SetBalance", excT.From.Hex(), "10000000")
 	check(err)
+
+	_, err = token1.SubmitTransaction("SetBalance", arbitT.From.Hex(), "0")
+	check(err)
 	time.Sleep(3 * time.Second)
+
+	printBalance(token1, amm1Account)
+	printBalance(token2, amm1Account)
+
+	printBalance(token1, amm2Account)
+	printBalance(token2, amm2Account)
+
+	fmt.Println("exchange balance")
+	printBalance(token1, excT.From.Hex())
 
 	fmt.Println("exchange balance")
 	printBalance(token1, excT.From.Hex())
@@ -162,13 +174,13 @@ func testFullApp() {
 
 	fmt.Println("initialize")
 
-	tx, err = token.Approve(lenderT, excT.From, big.NewInt(floan.Loan))
+	tx, err = token.Approve(lenderT, lenderAddr, big.NewInt(floan.Loan))
 	check(err)
 	success, err = cclib.WaitTx(ethClient, tx.Hash())
 	check(err)
 	printTxStatus(success)
 
-	allowance, err := token.Allowance(&bind.CallOpts{}, lenderT.From, excT.From)
+	allowance, err := token.Allowance(&bind.CallOpts{}, lenderT.From, lenderAddr)
 	check(err)
 	fmt.Println("Allowance: ", allowance.Int64())
 
@@ -204,11 +216,15 @@ func testFullApp() {
 
 	fmt.Println("end loan")
 
-	tx, err = token.Approve(excT, lenderT.From, big.NewInt(floan.Loan+floan.Intrest))
+	tx, err = token.Approve(excT, lenderAddr, big.NewInt(floan.Loan+floan.Intrest))
 	check(err)
 	success, err = cclib.WaitTx(ethClient, tx.Hash())
 	check(err)
 	printTxStatus(success)
+
+	allowance, err = token.Allowance(&bind.CallOpts{}, excT.From, lenderAddr)
+	check(err)
+	fmt.Println("Allowance: ", allowance.Int64())
 
 	tx, err = lenderContract.EndLoan(excT, true)
 	check(err)

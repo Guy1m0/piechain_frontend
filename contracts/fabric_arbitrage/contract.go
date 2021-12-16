@@ -98,7 +98,11 @@ func (sc *SmartContract) FeedLoan(ctx contractapi.TransactionContextInterface) e
 	if err != nil {
 		return err
 	}
-	err = sc.transferToken(ctx, Token1, flashloan.Exchange, flashloan.Arbitrage, flashloan.Loan)
+	myAccount, err := sc.GetAccount(ctx)
+	if err != nil {
+		return err
+	}
+	err = sc.transferToken(ctx, Token1, flashloan.Exchange, myAccount, flashloan.Loan)
 	if err != nil {
 		return err
 	}
