@@ -204,6 +204,8 @@ func testFullApp() {
 	fmt.Println("arbitrage balance")
 	printBalance(token1, arbitT.From.Hex())
 
+	printBalance(token1, arbitName)
+
 	_, err = arbitrage.SubmitTransaction("Execute", "", "")
 	check(err)
 	time.Sleep(3 * time.Second)

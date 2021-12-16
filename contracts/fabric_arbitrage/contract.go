@@ -135,7 +135,10 @@ func (sc *SmartContract) Execute(
 	// 	return err
 	// }
 
-	sc.transferToken(ctx, Token1, myAccount, flashloan.Arbitrage, flashloan.Loan)
+	err = sc.transferToken(ctx, Token1, myAccount, flashloan.Arbitrage, flashloan.Loan)
+	if err != nil {
+		return err
+	}
 
 	token2Amount, err := sc.exchange(ctx, "amm1", flashloan.Arbitrage, 1, flashloan.Loan)
 	if err != nil {
