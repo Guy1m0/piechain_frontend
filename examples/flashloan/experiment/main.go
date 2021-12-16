@@ -104,10 +104,10 @@ func testFullApp() {
 	_, err = token1.SubmitTransaction("SetBalance", excT.From.Hex(), "10000000")
 	check(err)
 
-	_, err = token1.SubmitTransaction("SetBalance", arbitT.From.Hex(), "0")
+	_, err = token1.SubmitTransaction("SetBalance", arbitT.From.Hex(), "20000")
 	check(err)
 
-	_, err = token2.SubmitTransaction("SetBalance", arbitT.From.Hex(), "0")
+	_, err = token2.SubmitTransaction("SetBalance", arbitT.From.Hex(), "20000")
 	check(err)
 
 	time.Sleep(3 * time.Second)
@@ -173,6 +173,10 @@ func testFullApp() {
 	check(err)
 	time.Sleep(3 * time.Second)
 
+	resp, err := arbitrage.EvaluateTransaction("GetFlashLoan")
+	check(err)
+	fmt.Println("Flashloan:", string(resp))
+
 	fmt.Println("initialize")
 
 	tx, err = token.Approve(lenderT, lenderAddr, big.NewInt(floan.Loan))
@@ -195,6 +199,8 @@ func testFullApp() {
 	check(err)
 	fmt.Println("lender balance: ", balbig.Int64())
 
+	printBalance(token1, arbitName)
+
 	_, err = arbitrage.SubmitTransaction("FeedLoan")
 	check(err)
 	time.Sleep(3 * time.Second)
@@ -204,6 +210,9 @@ func testFullApp() {
 
 	fmt.Println("arbitrage balance")
 	printBalance(token1, arbitT.From.Hex())
+
+	fmt.Println("arbitrage balance")
+	printBalance(token2, arbitT.From.Hex())
 
 	printBalance(token1, arbitName)
 
@@ -216,6 +225,11 @@ func testFullApp() {
 
 	fmt.Println("arbitrage balance")
 	printBalance(token1, arbitT.From.Hex())
+
+	fmt.Println("arbitrage balance")
+	printBalance(token2, arbitT.From.Hex())
+
+	printBalance(token1, arbitName)
 
 	fmt.Println("end loan")
 
