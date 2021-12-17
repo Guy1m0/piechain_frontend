@@ -83,6 +83,14 @@ func WriteJsonFile(filepath string, val interface{}) {
 	check(err)
 }
 
+func SplitSignature(sig string) (r [32]byte, s [32]byte, v uint8) {
+	b := common.Hex2Bytes(sig)
+	copy(r[:], b[:32])
+	copy(s[:], b[32:64])
+	v = b[64]
+	return
+}
+
 func check(err error) {
 	if err != nil {
 		panic(err)

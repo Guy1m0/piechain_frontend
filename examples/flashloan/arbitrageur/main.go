@@ -155,9 +155,15 @@ func execute() {
 		common.HexToAddress(floan.ArbitrageContract), ethClient,
 	)
 	check(err)
+
+	var commitVote flashloan.CommitVote
+	flashloan.ReadJsonFile(commitVoteFile, &commitVote)
+
+	rl, sl, vl := flashloan.SplitSignature(commitVote.LenderSig)
+	ra, sa, va := flashloan.SplitSignature(commitVote.ArbitrageSig)
 	tx, err := arbitrage.Execute(arbT,
-		0, [32]byte{}, [32]byte{},
-		0, [32]byte{}, [32]byte{},
+		vl, rl, sl,
+		va, ra, sa,
 	)
 	check(err)
 	fmt.Println("excute arbitrage...")

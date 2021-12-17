@@ -94,20 +94,20 @@ func (sc *SmartContract) Initialize(
 		return err
 	}
 
-	// // verify sig
-	// hash, err := sc.GetLoanHash(ctx)
-	// if err != nil {
-	// 	return err
-	// }
+	// verify sig
+	hash, err := sc.GetLoanHash(ctx)
+	if err != nil {
+		return err
+	}
 
-	// err = VerifySignature(hash, lenderSig, floan.Lender)
-	// if err != nil {
-	// 	return err
-	// }
-	// err = VerifySignature(hash, arbSig, floan.Arbitrage)
-	// if err != nil {
-	// 	return err
-	// }
+	err = VerifySignature(hash, lenderSig, floan.Lender)
+	if err != nil {
+		return err
+	}
+	err = VerifySignature(hash, arbSig, floan.Arbitrage)
+	if err != nil {
+		return err
+	}
 
 	err = sc.transferToken(ctx, Token1, floan.Lender, floan.Exchange, floan.Loan)
 	if err != nil {
