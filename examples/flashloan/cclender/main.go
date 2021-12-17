@@ -55,6 +55,7 @@ func createFlashloan(c echo.Context) error {
 }
 
 func listenLenderInitialize(floan *flashloan.Flashloan) {
+	fmt.Println("listen lender initialize...")
 	lenderCode := flashloan.NewChaincode(floan.LenderContract)
 	for {
 		resp, err := lenderCode.EvaluateTransaction("GetStatus")

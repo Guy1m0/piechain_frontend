@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/aungmawjj/piechain/examples/flashloan"
@@ -14,10 +15,11 @@ func handleFlashloanSuccessful(payload []byte) {
 	check(err)
 
 	lenderCode := flashloan.NewChaincode(floan.LenderContract)
-	_, err = lenderCode.EvaluateTransaction("EndLoan", "true")
+	_, err = lenderCode.SubmitTransaction("EndLoan", "true")
 	check(err)
+	fmt.Println("Ending flash loan. Refund loan + intrest: ", floan.Loan+floan.Intrest)
 	time.Sleep(3 * time.Second)
-	fmt.Println("Ended flash loan. Refund loan + intrest: ", floan.Loan+floan.Intrest)
+	confirmEndLoan(lenderCode)
 }
 
 func handleFlashloanFail(payload []byte) {
@@ -26,8 +28,21 @@ func handleFlashloanFail(payload []byte) {
 	check(err)
 
 	lenderCode := flashloan.NewChaincode(floan.LenderContract)
-	_, err = lenderCode.EvaluateTransaction("EndLoan", "false")
+	_, err = lenderCode.SubmitTransaction("EndLoan", "false")
 	check(err)
+	fmt.Println("Ending flash loan. Refund loan: ", floan.Loan)
 	time.Sleep(3 * time.Second)
-	fmt.Println("Ended flash loan. Refund loan: ", floan.Loan)
+	confirmEndLoan(lenderCode)
+}
+
+func confirmEndLoan(lenderCode *flashloan.Chaincode) {
+	resp, err := lenderCode.EvaluateTransaction("GetStatus")
+	check(err)
+
+	status, err := strconv.Atoi(string(resp))
+	check(err)
+
+	if status == 3 {
+		fmt.Println("ended loan")
+	}
 }
