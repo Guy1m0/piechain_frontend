@@ -21,7 +21,7 @@ var (
 )
 
 func NewEthClient() *ethclient.Client {
-	client, err := ethclient.Dial(fmt.Sprintf("http://%s:8545", "localhost"))
+	client, err := ethclient.Dial(fmt.Sprintf("http://%s:8546", "localhost"))
 	check(err)
 	return client
 }
