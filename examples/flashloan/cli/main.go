@@ -91,16 +91,14 @@ func setup() {
 	check(err)
 	flashloan.WaitTx(ethClient, tx, "deploy amm2")
 
-	supply, _ = big.NewInt(0).SetString("1"+strings.Repeat("0", flashloan.Decimal+6), 10) // 1000000
+	flashloan.TransferToken(ethClient, token1, rootT, excT.From, 1000000)
+	flashloan.TransferToken(ethClient, token2, rootT, excT.From, 1000000)
 
-	flashloan.TransferToken(ethClient, token1, rootT, excT.From, supply)
-	flashloan.TransferToken(ethClient, token2, rootT, excT.From, supply)
+	flashloan.TransferToken(ethClient, token1, rootT, amm1Address, 1000000)
+	flashloan.TransferToken(ethClient, token2, rootT, amm1Address, 1000000)
 
-	flashloan.TransferToken(ethClient, token1, rootT, amm1Address, supply)
-	flashloan.TransferToken(ethClient, token2, rootT, amm1Address, supply)
-
-	flashloan.TransferToken(ethClient, token1, rootT, amm2Address, supply)
-	flashloan.TransferToken(ethClient, token2, rootT, amm2Address, supply)
+	flashloan.TransferToken(ethClient, token1, rootT, amm2Address, 1000000)
+	flashloan.TransferToken(ethClient, token2, rootT, amm2Address, 1000000)
 
 	flashloan.PrintTokenBalance(token1, excT.From, "token1", "exchange")
 	flashloan.PrintTokenBalance(token2, excT.From, "token2", "exchange")

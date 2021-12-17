@@ -16,6 +16,15 @@ func handleFlashloanInitialized(payload []byte) {
 	check(err)
 
 	// transfer token to arbitrage contract
+	var setupInfo flashloan.SetupInfo
+	flashloan.ReadJsonFile(setupInfoFile, &setupInfo)
+
+	token1, err := eth_arbitrage.NewERC20(setupInfo.Token1Address, ethClient)
+	check(err)
+
+	flashloan.TransferToken(
+		ethClient, token1, excT, common.HexToAddress(floan.ArbitrageContract), floan.Loan,
+	)
 
 	status := listenArbitrageEnd(&floan)
 	if status == 2 {
