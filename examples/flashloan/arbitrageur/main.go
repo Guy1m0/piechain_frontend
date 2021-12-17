@@ -52,8 +52,7 @@ func main() {
 	arbT, err = cclib.NewTransactor(arbitKey, password)
 	check(err)
 
-	ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s:8546", "localhost"))
-	check(err)
+	ethClient = flashloan.NewEthClient()
 
 	switch *command {
 	case "setup":

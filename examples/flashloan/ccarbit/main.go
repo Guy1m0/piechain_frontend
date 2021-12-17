@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"strings"
 
 	"github.com/aungmawjj/piechain/cclib"
@@ -31,8 +30,7 @@ func main() {
 
 	var err error
 
-	ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s:8546", "localhost"))
-	check(err)
+	ethClient = flashloan.NewEthClient()
 	excT, err = cclib.NewTransactor(excKey, password)
 	check(err)
 

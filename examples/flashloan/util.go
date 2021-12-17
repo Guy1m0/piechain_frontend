@@ -20,6 +20,12 @@ var (
 	DecimalB, _ = big.NewInt(0).SetString("1"+strings.Repeat("0", Decimal), 10)
 )
 
+func NewEthClient() *ethclient.Client {
+	client, err := ethclient.Dial(fmt.Sprintf("http://%s:8545", "localhost"))
+	check(err)
+	return client
+}
+
 func PrintFabricBalance(token *Chaincode, account string, label string) {
 	b, err := token.EvaluateTransaction("GetBalance", account)
 	check(err)
