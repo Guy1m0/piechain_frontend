@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"math/big"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -56,6 +58,8 @@ func main() {
 	switch *command {
 	case "setup":
 		setup()
+	case "register":
+		register()
 	case "execute":
 		execute()
 
@@ -129,6 +133,19 @@ func setup() {
 
 	flashloan.WriteJsonFile(flashloanFile, floan)
 	flashloan.WriteJsonFile(commitVoteFile, commitVote)
+}
+
+func register() {
+	var floan flashloan.Flashloan
+	flashloan.ReadJsonFile(flashloanFile, &floan)
+
+	b, _ := json.Marshal(floan)
+
+	http.Post("http://localhost:9000/flashloan",
+		"application/json",
+		bytes.NewReader(b),
+	)
+
 }
 
 func execute() {

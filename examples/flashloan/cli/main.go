@@ -50,6 +50,7 @@ func main() {
 	check(err)
 
 	command := flag.String("c", "", "command")
+	flag.Parse()
 
 	switch *command {
 	case "setup":

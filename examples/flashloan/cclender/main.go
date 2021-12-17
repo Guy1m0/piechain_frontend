@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -47,6 +48,8 @@ func createFlashloan(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("register new flashloan, loan: %d, intrest: %d\n", floan.Loan, floan.Intrest)
 	go listenLenderInitialize(&floan)
 	return c.NoContent(http.StatusOK)
 }
