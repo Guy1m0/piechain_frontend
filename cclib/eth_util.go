@@ -2,7 +2,6 @@ package cclib
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -22,9 +21,6 @@ func WaitTx(client *ethclient.Client, hash common.Hash) (bool, error) {
 		}
 		if err != nil {
 			return false, err
-		}
-		if r.Status == types.ReceiptStatusFailed {
-			fmt.Printf("%+v\n", r)
 		}
 		return r.Status == types.ReceiptStatusSuccessful, nil
 	}

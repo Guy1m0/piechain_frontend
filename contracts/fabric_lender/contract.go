@@ -1,4 +1,4 @@
-package arbitrage
+package lender
 
 import (
 	"encoding/hex"
@@ -33,8 +33,6 @@ const (
 	KeyLoanHash  = "loanHash"
 	KeyStatus    = "status"
 
-	KeyAccount = "account"
-
 	Token1 = "token1"
 )
 
@@ -45,7 +43,11 @@ func (sc *SmartContract) Setup(
 	if err != nil {
 		return err
 	}
-	return ctx.GetStub().PutState(KeyLoanHash, []byte(loanHash))
+	err = ctx.GetStub().PutState(KeyLoanHash, []byte(loanHash))
+	if err != nil {
+		return err
+	}
+	return sc.SetStatus(ctx, 1)
 }
 
 func (sc *SmartContract) GetLoanHash(ctx contractapi.TransactionContextInterface) (string, error) {
@@ -84,100 +86,52 @@ func (sc *SmartContract) GetStatus(ctx contractapi.TransactionContextInterface) 
 	return strconv.Atoi(string(b))
 }
 
-func (sc *SmartContract) SetAccount(ctx contractapi.TransactionContextInterface, account string) error {
-	return ctx.GetStub().PutState(KeyAccount, []byte(account))
-}
-
-func (sc *SmartContract) GetAccount(ctx contractapi.TransactionContextInterface) (string, error) {
-	b, err := ctx.GetStub().GetState(KeyAccount)
-	return string(b), err
-}
-
-func (sc *SmartContract) FeedLoan(ctx contractapi.TransactionContextInterface) error {
-	flashloan, err := sc.GetFlashLoan(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = sc.transferToken(ctx, Token1, flashloan.Exchange, flashloan.Arbitrage, flashloan.Loan)
-	if err != nil {
-		return err
-	}
-	return sc.SetStatus(ctx, 1)
-}
-
-func (sc *SmartContract) Execute(
-	ctx contractapi.TransactionContextInterface, lenderSig, arbitSig string,
+func (sc *SmartContract) Initialize(
+	ctx contractapi.TransactionContextInterface, lenderSig, arbSig string,
 ) error {
-	myAccount, err := sc.GetAccount(ctx)
+	floan, err := sc.GetFlashLoan(ctx)
 	if err != nil {
 		return err
 	}
-	flashloan, err := sc.GetFlashLoan(ctx)
-	if err != nil {
-		return err
-	}
-	// loanHash, err := sc.GetLoanHash(ctx)
+
+	// // verify sig
+	// hash, err := sc.GetLoanHash(ctx)
 	// if err != nil {
 	// 	return err
 	// }
 
-	// err = VerifySignature(loanHash, lenderSig, flashloan.Lender)
+	// err = VerifySignature(hash, lenderSig, floan.Lender)
+	// if err != nil {
+	// 	return err
+	// }
+	// err = VerifySignature(hash, arbSig, floan.Arbitrage)
 	// if err != nil {
 	// 	return err
 	// }
 
-	// err = VerifySignature(loanHash, arbitSig, flashloan.Arbitrage)
-	// if err != nil {
-	// 	return err
-	// }
-
-	err = sc.transferToken(
-		ctx, Token1, myAccount, flashloan.Arbitrage,
-		flashloan.Loan,
-	)
+	err = sc.transferToken(ctx, Token1, floan.Lender, floan.Exchange, floan.Loan)
 	if err != nil {
 		return err
 	}
-	token2Amount, err := sc.exchange(ctx, "amm1", flashloan.Arbitrage, 1, flashloan.Loan)
-	if err != nil {
-		return err
-	}
-	token1Amount, err := sc.exchange(ctx, "amm2", flashloan.Arbitrage, 2, token2Amount)
-	if err != nil {
-		return err
-	}
-	if token1Amount < flashloan.Loan+flashloan.Intrest {
-		return fmt.Errorf("not enough profit")
-	}
-
-	err = sc.transferToken(
-		ctx, Token1, flashloan.Arbitrage, flashloan.Exchange,
-		flashloan.Loan+flashloan.Intrest,
-	)
-	if err != nil {
-		return err
-	}
-
 	return sc.SetStatus(ctx, 2)
 }
 
-func (sc *SmartContract) exchange(
-	ctx contractapi.TransactionContextInterface,
-	amm string, sender string, excType int, amount int64,
-) (int64, error) {
-	resp := ctx.GetStub().InvokeChaincode(amm, [][]byte{
-		[]byte("Exchange"),
-		[]byte(sender),
-		[]byte(fmt.Sprint(excType)),
-		[]byte(fmt.Sprint(amount)),
-	}, "mychannel")
-	if resp.Status != shim.OK {
-		return 0, fmt.Errorf("failed to exchange %s, %s", amm, resp.Message)
+func (sc *SmartContract) EndLoan(
+	ctx contractapi.TransactionContextInterface, success bool,
+) error {
+	floan, err := sc.GetFlashLoan(ctx)
+	if err != nil {
+		return err
 	}
-	var result int64
-	err := json.Unmarshal(resp.Payload, &result)
-	return result, err
+	refund := floan.Loan
+	if success {
+		refund += floan.Intrest
+	}
+	err = sc.transferToken(ctx, Token1, floan.Exchange, floan.Lender, refund)
+	if err != nil {
+		return err
+	}
+	return sc.SetStatus(ctx, 3)
 }
 
 func (sc *SmartContract) transferToken(

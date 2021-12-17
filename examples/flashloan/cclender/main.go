@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aungmawjj/piechain/cclib"
 	"github.com/aungmawjj/piechain/examples/flashloan"
@@ -39,13 +42,33 @@ func main() {
 }
 
 func createFlashloan(c echo.Context) error {
-	var req flashloan.Flashloan
-	err := c.Bind(&req)
+	var floan flashloan.Flashloan
+	err := c.Bind(&floan)
 	if err != nil {
 		return err
 	}
-	// go listen init
+	go listenLenderInitialize(&floan)
 	return c.NoContent(http.StatusOK)
+}
+
+func listenLenderInitialize(floan *flashloan.Flashloan) {
+	lenderCode := flashloan.NewChaincode(floan.LenderContract)
+	for {
+		resp, err := lenderCode.EvaluateTransaction("GetStatus")
+		check(err)
+
+		status, err := strconv.Atoi(string(resp))
+		check(err)
+
+		if status == 1 {
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
+
+	payload, _ := json.Marshal(floan)
+	err := ccsvc.Publish(flashloan.OnInitializedLending, payload)
+	check(err)
 }
 
 func check(err error) {

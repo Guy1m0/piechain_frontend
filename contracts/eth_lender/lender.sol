@@ -35,8 +35,8 @@ contract Lender {
         uint8 vl, bytes32 rl, bytes32 sl, 
         uint8 va, bytes32 ra, bytes32 sa
     ) public {
-        // require(lender == ecrecover(loanHash, vl, rl, sl), "Invalid Lender Signature");
-        // require(arbitrage == ecrecover(loanHash, va, ra, sa), "Invalid Arbitrage Signature");
+        require(lender == ecrecover(loanHash, vl, rl, sl), "Invalid Lender Signature");
+        require(arbitrage == ecrecover(loanHash, va, ra, sa), "Invalid Arbitrage Signature");
         ERC20 token = ERC20(tokenAddress);
         if (token.transferFrom(lender, exchange, loan)) {
             status = 1;
@@ -53,7 +53,6 @@ contract Lender {
             status = 2;
         }
     }
-
 }
 
 contract ERC20 {
