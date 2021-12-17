@@ -57,6 +57,8 @@ func main() {
 		setup()
 	case "display":
 		display()
+	case "diffRate":
+		diffRate()
 	case "sameRate":
 		sameRate()
 
@@ -117,11 +119,11 @@ func setup() {
 	amm2, err := eth_arbitrage.NewAMM(amm2Address, ethClient)
 	check(err)
 
-	tx, err = amm1.SetRate(excT, big.NewInt(2), big.NewInt(3))
+	tx, err = amm1.SetRate(rootT, big.NewInt(2), big.NewInt(3))
 	check(err)
 	flashloan.WaitTx(ethClient, tx, "set amm1 rate")
 
-	tx, err = amm2.SetRate(excT, big.NewInt(1), big.NewInt(1))
+	tx, err = amm2.SetRate(rootT, big.NewInt(1), big.NewInt(1))
 	check(err)
 	flashloan.WaitTx(ethClient, tx, "set amm2 rate")
 
@@ -175,8 +177,44 @@ func display() {
 	flashloan.PrintFabricBalance(fabricToken, lenderT.From.Hex(), "lender")
 }
 
-func sameRate() {
+func diffRate() {
+	var setupInfo flashloan.SetupInfo
+	flashloan.ReadJsonFile(setupInfoFile, &setupInfo)
 
+	amm1, err := eth_arbitrage.NewAMM(setupInfo.Amm1Address, ethClient)
+	check(err)
+	amm2, err := eth_arbitrage.NewAMM(setupInfo.Amm2Address, ethClient)
+	check(err)
+
+	tx, err := amm1.SetRate(rootT, big.NewInt(2), big.NewInt(3))
+	check(err)
+	flashloan.WaitTx(ethClient, tx, "set amm1 rate")
+
+	tx, err = amm2.SetRate(rootT, big.NewInt(1), big.NewInt(1))
+	check(err)
+	flashloan.WaitTx(ethClient, tx, "set amm2 rate")
+
+	fmt.Println("set different rate to make profit")
+}
+
+func sameRate() {
+	var setupInfo flashloan.SetupInfo
+	flashloan.ReadJsonFile(setupInfoFile, &setupInfo)
+
+	amm1, err := eth_arbitrage.NewAMM(setupInfo.Amm1Address, ethClient)
+	check(err)
+	amm2, err := eth_arbitrage.NewAMM(setupInfo.Amm2Address, ethClient)
+	check(err)
+
+	tx, err := amm1.SetRate(rootT, big.NewInt(1), big.NewInt(1))
+	check(err)
+	flashloan.WaitTx(ethClient, tx, "set amm1 rate")
+
+	tx, err = amm2.SetRate(rootT, big.NewInt(1), big.NewInt(1))
+	check(err)
+	flashloan.WaitTx(ethClient, tx, "set amm2 rate")
+
+	fmt.Println("set same rate between two amm, arbitrageur should not make profit.")
 }
 
 func check(err error) {
