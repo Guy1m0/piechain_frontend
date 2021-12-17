@@ -63,7 +63,7 @@ func listenLenderInitialize(floan *flashloan.Flashloan) {
 		status, err := strconv.Atoi(string(resp))
 		check(err)
 
-		if status == 1 {
+		if status == 2 {
 			break
 		}
 		time.Sleep(1 * time.Second)
