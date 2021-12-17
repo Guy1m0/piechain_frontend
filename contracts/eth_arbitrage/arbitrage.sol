@@ -70,6 +70,8 @@ contract Arbitrage {
 
     function rollback() public {
         require(msg.sender == exchange || msg.sender == arbitrageur, "don't have approval");
+        ERC20 token1 = ERC20(token1Address);
+        token1.transfer(exchange, loan);
         status = 10;
     }
 }

@@ -17,7 +17,7 @@ func handleFlashloanSuccessful(payload []byte) {
 	_, err = lenderCode.EvaluateTransaction("EndLoan", "true")
 	check(err)
 	time.Sleep(3 * time.Second)
-	fmt.Println("Ended flash loan. Refund loan + intrest: ", floan.Intrest+floan.Intrest)
+	fmt.Println("Ended flash loan. Refund loan + intrest: ", floan.Loan+floan.Intrest)
 }
 
 func handleFlashloanFail(payload []byte) {
@@ -29,5 +29,5 @@ func handleFlashloanFail(payload []byte) {
 	_, err = lenderCode.EvaluateTransaction("EndLoan", "false")
 	check(err)
 	time.Sleep(3 * time.Second)
-	fmt.Println("Ended flash loan. Refund loan: ", floan.Intrest)
+	fmt.Println("Ended flash loan. Refund loan: ", floan.Loan)
 }
