@@ -4,6 +4,7 @@
 package eth_lender
 
 import (
+	"errors"
 	"math/big"
 	"strings"
 
@@ -17,42 +18,53 @@ import (
 
 // Reference imports to suppress errors if they are not otherwise used.
 var (
+	_ = errors.New
 	_ = big.NewInt
 	_ = strings.NewReader
 	_ = ethereum.NotFound
-	_ = abi.U256
 	_ = bind.Bind
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
 )
 
-// ERC20ABI is the input ABI used to generate the binding from.
-const ERC20ABI = "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"initialSupply\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
-
-var ERC20ParsedABI, _ = abi.JSON(strings.NewReader(ERC20ABI))
-
-// ERC20FuncSigs maps the 4-byte function signature to its string representation.
-var ERC20FuncSigs = map[string]string{
-	"dd62ed3e": "allowance(address,address)",
-	"095ea7b3": "approve(address,uint256)",
-	"70a08231": "balanceOf(address)",
-	"18160ddd": "totalSupply()",
-	"a9059cbb": "transfer(address,uint256)",
-	"23b872dd": "transferFrom(address,address,uint256)",
+// ERC20MetaData contains all meta data concerning the ERC20 contract.
+var ERC20MetaData = &bind.MetaData{
+	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"initialSupply\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	Sigs: map[string]string{
+		"dd62ed3e": "allowance(address,address)",
+		"095ea7b3": "approve(address,uint256)",
+		"70a08231": "balanceOf(address)",
+		"18160ddd": "totalSupply()",
+		"a9059cbb": "transfer(address,uint256)",
+		"23b872dd": "transferFrom(address,address,uint256)",
+	},
+	Bin: "0x608060405234801561001057600080fd5b506040516106f63803806106f683398101604081905261002f916100e1565b610039338261003f565b50610120565b6001600160a01b0382166100995760405162461bcd60e51b815260206004820152601f60248201527f45524332303a206d696e7420746f20746865207a65726f206164647265737300604482015260640160405180910390fd5b80600260008282546100ab91906100fa565b90915550506001600160a01b038216600090815260208190526040812080548392906100d89084906100fa565b90915550505050565b6000602082840312156100f357600080fd5b5051919050565b6000821982111561011b57634e487b7160e01b600052601160045260246000fd5b500190565b6105c78061012f6000396000f3fe608060405234801561001057600080fd5b50600436106100625760003560e01c8063095ea7b31461006757806318160ddd1461008f57806323b872dd146100a157806370a08231146100b4578063a9059cbb146100dd578063dd62ed3e146100f0575b600080fd5b61007a610075366004610491565b610129565b60405190151581526020015b60405180910390f35b6002545b604051908152602001610086565b61007a6100af3660046104bb565b61013f565b6100936100c23660046104f7565b6001600160a01b031660009081526020819052604090205490565b61007a6100eb366004610491565b6101f3565b6100936100fe366004610519565b6001600160a01b03918216600090815260016020908152604080832093909416825291909152205490565b6000610136338484610200565b50600192915050565b600061014c8484846102ef565b6001600160a01b0384166000908152600160209081526040808320338452909152902054828110156101d45760405162461bcd60e51b815260206004820152602660248201527f45524332303a207472616e73666572206c6f616e206578636565647320616c6c6044820152656f77616e636560d01b60648201526084015b60405180910390fd5b6101e885336101e38685610562565b610200565b506001949350505050565b60006101363384846102ef565b6001600160a01b0383166102625760405162461bcd60e51b8152602060048201526024808201527f45524332303a20617070726f76652066726f6d20746865207a65726f206164646044820152637265737360e01b60648201526084016101cb565b6001600160a01b0382166102c35760405162461bcd60e51b815260206004820152602260248201527f45524332303a20617070726f766520746f20746865207a65726f206164647265604482015261737360f01b60648201526084016101cb565b6001600160a01b0392831660009081526001602090815260408083209490951682529290925291902055565b6001600160a01b0383166103535760405162461bcd60e51b815260206004820152602560248201527f45524332303a207472616e736665722066726f6d20746865207a65726f206164604482015264647265737360d81b60648201526084016101cb565b6001600160a01b0382166103b55760405162461bcd60e51b815260206004820152602360248201527f45524332303a207472616e7366657220746f20746865207a65726f206164647260448201526265737360e81b60648201526084016101cb565b6001600160a01b0383166000908152602081905260409020548181101561042a5760405162461bcd60e51b8152602060048201526024808201527f45524332303a207472616e73666572206c6f616e20657863656564732062616c604482015263616e636560e01b60648201526084016101cb565b6104348282610562565b6001600160a01b03808616600090815260208190526040808220939093559085168152908120805484929061046a908490610579565b909155505050505050565b80356001600160a01b038116811461048c57600080fd5b919050565b600080604083850312156104a457600080fd5b6104ad83610475565b946020939093013593505050565b6000806000606084860312156104d057600080fd5b6104d984610475565b92506104e760208501610475565b9150604084013590509250925092565b60006020828403121561050957600080fd5b61051282610475565b9392505050565b6000806040838503121561052c57600080fd5b61053583610475565b915061054360208401610475565b90509250929050565b634e487b7160e01b600052601160045260246000fd5b6000828210156105745761057461054c565b500390565b6000821982111561058c5761058c61054c565b50019056fea2646970667358221220c0c67c71160b1051695817312afaa6ee997da5c311ac0d9df93963badef5f38964736f6c634300080b0033",
 }
 
+// ERC20ABI is the input ABI used to generate the binding from.
+// Deprecated: Use ERC20MetaData.ABI instead.
+var ERC20ABI = ERC20MetaData.ABI
+
+// Deprecated: Use ERC20MetaData.Sigs instead.
+// ERC20FuncSigs maps the 4-byte function signature to its string representation.
+var ERC20FuncSigs = ERC20MetaData.Sigs
+
 // ERC20Bin is the compiled bytecode used for deploying new contracts.
-var ERC20Bin = "0x608060405234801561001057600080fd5b506040516106283803806106288339818101604052602081101561003357600080fd5b505161004833826001600160e01b0361004e16565b506100d3565b6001600160a01b0382166100a9576040805162461bcd60e51b815260206004820152601f60248201527f45524332303a206d696e7420746f20746865207a65726f206164647265737300604482015290519081900360640190fd5b60028054820190556001600160a01b03909116600090815260208190526040902080549091019055565b610546806100e26000396000f3fe608060405234801561001057600080fd5b50600436106100625760003560e01c8063095ea7b31461006757806318160ddd146100a757806323b872dd146100c157806370a08231146100f7578063a9059cbb1461011d578063dd62ed3e14610149575b600080fd5b6100936004803603604081101561007d57600080fd5b506001600160a01b038135169060200135610177565b604080519115158252519081900360200190f35b6100af61018d565b60408051918252519081900360200190f35b610093600480360360608110156100d757600080fd5b506001600160a01b03813581169160208101359091169060400135610193565b6100af6004803603602081101561010d57600080fd5b50356001600160a01b031661021b565b6100936004803603604081101561013357600080fd5b506001600160a01b038135169060200135610236565b6100af6004803603604081101561015f57600080fd5b506001600160a01b0381358116916020013516610243565b600061018433848461026e565b50600192915050565b60025490565b60006101a0848484610324565b6001600160a01b0384166000908152600160209081526040808320338452909152902054828110156102035760405162461bcd60e51b815260040180806020018281038252602681526020018061047f6026913960400191505060405180910390fd5b610210853385840361026e565b506001949350505050565b6001600160a01b031660009081526020819052604090205490565b6000610184338484610324565b6001600160a01b03918216600090815260016020908152604080832093909416825291909152205490565b6001600160a01b0383166102b35760405162461bcd60e51b81526004018080602001828103825260248152602001806104ca6024913960400191505060405180910390fd5b6001600160a01b0382166102f85760405162461bcd60e51b815260040180806020018281038252602281526020018061045d6022913960400191505060405180910390fd5b6001600160a01b0392831660009081526001602090815260408083209490951682529290925291902055565b6001600160a01b0383166103695760405162461bcd60e51b81526004018080602001828103825260258152602001806104a56025913960400191505060405180910390fd5b6001600160a01b0382166103ae5760405162461bcd60e51b815260040180806020018281038252602381526020018061043a6023913960400191505060405180910390fd5b6001600160a01b038316600090815260208190526040902054818110156104065760405162461bcd60e51b81526004018080602001828103825260248152602001806104ee6024913960400191505060405180910390fd5b6001600160a01b03938416600090815260208190526040808220928490039092559290931682529190208054909101905556fe45524332303a207472616e7366657220746f20746865207a65726f206164647265737345524332303a20617070726f766520746f20746865207a65726f206164647265737345524332303a207472616e73666572206c6f616e206578636565647320616c6c6f77616e636545524332303a207472616e736665722066726f6d20746865207a65726f206164647265737345524332303a20617070726f76652066726f6d20746865207a65726f206164647265737345524332303a207472616e73666572206c6f616e20657863656564732062616c616e6365a265627a7a723158209df722e662ec81bcea85436ecc521374d6bc37e26fa785b2b8581cd833a6c4db64736f6c63430005110032"
+// Deprecated: Use ERC20MetaData.Bin instead.
+var ERC20Bin = ERC20MetaData.Bin
 
 // DeployERC20 deploys a new Ethereum contract, binding an instance of ERC20 to it.
 func DeployERC20(auth *bind.TransactOpts, backend bind.ContractBackend, initialSupply *big.Int) (common.Address, *types.Transaction, *ERC20, error) {
-	parsed, err := abi.JSON(strings.NewReader(ERC20ABI))
+	parsed, err := ERC20MetaData.GetAbi()
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
+	if parsed == nil {
+		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
+	}
 
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(ERC20Bin), backend, initialSupply)
+	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(ERC20Bin), backend, initialSupply)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -167,7 +179,7 @@ func bindERC20(address common.Address, caller bind.ContractCaller, transactor bi
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_ERC20 *ERC20Raw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_ERC20 *ERC20Raw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _ERC20.Contract.ERC20Caller.contract.Call(opts, result, method, params...)
 }
 
@@ -186,7 +198,7 @@ func (_ERC20 *ERC20Raw) Transact(opts *bind.TransactOpts, method string, params 
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_ERC20 *ERC20CallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_ERC20 *ERC20CallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _ERC20.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -203,78 +215,93 @@ func (_ERC20 *ERC20TransactorRaw) Transact(opts *bind.TransactOpts, method strin
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(address owner, address spender) constant returns(uint256)
+// Solidity: function allowance(address owner, address spender) view returns(uint256)
 func (_ERC20 *ERC20Caller) Allowance(opts *bind.CallOpts, owner common.Address, spender common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ERC20.contract.Call(opts, out, "allowance", owner, spender)
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20.contract.Call(opts, &out, "allowance", owner, spender)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(address owner, address spender) constant returns(uint256)
+// Solidity: function allowance(address owner, address spender) view returns(uint256)
 func (_ERC20 *ERC20Session) Allowance(owner common.Address, spender common.Address) (*big.Int, error) {
 	return _ERC20.Contract.Allowance(&_ERC20.CallOpts, owner, spender)
 }
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(address owner, address spender) constant returns(uint256)
+// Solidity: function allowance(address owner, address spender) view returns(uint256)
 func (_ERC20 *ERC20CallerSession) Allowance(owner common.Address, spender common.Address) (*big.Int, error) {
 	return _ERC20.Contract.Allowance(&_ERC20.CallOpts, owner, spender)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(address account) constant returns(uint256)
+// Solidity: function balanceOf(address account) view returns(uint256)
 func (_ERC20 *ERC20Caller) BalanceOf(opts *bind.CallOpts, account common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ERC20.contract.Call(opts, out, "balanceOf", account)
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20.contract.Call(opts, &out, "balanceOf", account)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(address account) constant returns(uint256)
+// Solidity: function balanceOf(address account) view returns(uint256)
 func (_ERC20 *ERC20Session) BalanceOf(account common.Address) (*big.Int, error) {
 	return _ERC20.Contract.BalanceOf(&_ERC20.CallOpts, account)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(address account) constant returns(uint256)
+// Solidity: function balanceOf(address account) view returns(uint256)
 func (_ERC20 *ERC20CallerSession) BalanceOf(account common.Address) (*big.Int, error) {
 	return _ERC20.Contract.BalanceOf(&_ERC20.CallOpts, account)
 }
 
 // TotalSupply is a free data retrieval call binding the contract method 0x18160ddd.
 //
-// Solidity: function totalSupply() constant returns(uint256)
+// Solidity: function totalSupply() view returns(uint256)
 func (_ERC20 *ERC20Caller) TotalSupply(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ERC20.contract.Call(opts, out, "totalSupply")
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20.contract.Call(opts, &out, "totalSupply")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // TotalSupply is a free data retrieval call binding the contract method 0x18160ddd.
 //
-// Solidity: function totalSupply() constant returns(uint256)
+// Solidity: function totalSupply() view returns(uint256)
 func (_ERC20 *ERC20Session) TotalSupply() (*big.Int, error) {
 	return _ERC20.Contract.TotalSupply(&_ERC20.CallOpts)
 }
 
 // TotalSupply is a free data retrieval call binding the contract method 0x18160ddd.
 //
-// Solidity: function totalSupply() constant returns(uint256)
+// Solidity: function totalSupply() view returns(uint256)
 func (_ERC20 *ERC20CallerSession) TotalSupply() (*big.Int, error) {
 	return _ERC20.Contract.TotalSupply(&_ERC20.CallOpts)
 }
@@ -342,37 +369,48 @@ func (_ERC20 *ERC20TransactorSession) TransferFrom(sender common.Address, recipi
 	return _ERC20.Contract.TransferFrom(&_ERC20.TransactOpts, sender, recipient, loan)
 }
 
-// LenderABI is the input ABI used to generate the binding from.
-const LenderABI = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddress_\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":true,\"inputs\":[],\"name\":\"arbitrage\",\"outputs\":[{\"internalType\":\"addresspayable\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"}],\"name\":\"endLoan\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"exchange\",\"outputs\":[{\"internalType\":\"addresspayable\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"vl\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"rl\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sl\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"va\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"ra\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sa\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"intrest\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"lender\",\"outputs\":[{\"internalType\":\"addresspayable\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"loan\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"loanHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"lender_\",\"type\":\"address\"},{\"internalType\":\"addresspayable\",\"name\":\"arbitrage_\",\"type\":\"address\"},{\"internalType\":\"addresspayable\",\"name\":\"exchange_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"intrest_\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"loanHash_\",\"type\":\"bytes32\"}],\"name\":\"setup\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"status\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"tokenAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
-
-var LenderParsedABI, _ = abi.JSON(strings.NewReader(LenderABI))
-
-// LenderFuncSigs maps the 4-byte function signature to its string representation.
-var LenderFuncSigs = map[string]string{
-	"69c8d338": "arbitrage()",
-	"fbd3f3ce": "endLoan(bool)",
-	"d2f7265a": "exchange()",
-	"fa5f4034": "initialize(uint8,bytes32,bytes32,uint8,bytes32,bytes32)",
-	"ffbe7402": "intrest()",
-	"bcead63e": "lender()",
-	"d285b7b4": "loan()",
-	"1e306772": "loanHash()",
-	"566b7de8": "setup(address,address,address,uint256,uint256,bytes32)",
-	"200d2ed2": "status()",
-	"9d76ea58": "tokenAddress()",
+// LenderMetaData contains all meta data concerning the Lender contract.
+var LenderMetaData = &bind.MetaData{
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddress_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"arbitrage\",\"outputs\":[{\"internalType\":\"addresspayable\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"}],\"name\":\"endLoan\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"exchange\",\"outputs\":[{\"internalType\":\"addresspayable\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"vl\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"rl\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sl\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"va\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"ra\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sa\",\"type\":\"bytes32\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"intrest\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lender\",\"outputs\":[{\"internalType\":\"addresspayable\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"loan\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"loanHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"lender_\",\"type\":\"address\"},{\"internalType\":\"addresspayable\",\"name\":\"arbitrage_\",\"type\":\"address\"},{\"internalType\":\"addresspayable\",\"name\":\"exchange_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"intrest_\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"loanHash_\",\"type\":\"bytes32\"}],\"name\":\"setup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"status\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	Sigs: map[string]string{
+		"69c8d338": "arbitrage()",
+		"fbd3f3ce": "endLoan(bool)",
+		"d2f7265a": "exchange()",
+		"fa5f4034": "initialize(uint8,bytes32,bytes32,uint8,bytes32,bytes32)",
+		"ffbe7402": "intrest()",
+		"bcead63e": "lender()",
+		"d285b7b4": "loan()",
+		"1e306772": "loanHash()",
+		"566b7de8": "setup(address,address,address,uint256,uint256,bytes32)",
+		"200d2ed2": "status()",
+		"9d76ea58": "tokenAddress()",
+	},
+	Bin: "0x608060405234801561001057600080fd5b506040516106c23803806106c283398101604081905261002f91610054565b600080546001600160a01b0319166001600160a01b0392909216919091179055610084565b60006020828403121561006657600080fd5b81516001600160a01b038116811461007d57600080fd5b9392505050565b61062f806100936000396000f3fe608060405234801561001057600080fd5b50600436106100a95760003560e01c8063bcead63e11610071578063bcead63e14610170578063d285b7b414610183578063d2f7265a1461018c578063fa5f40341461019f578063fbd3f3ce146101b2578063ffbe7402146101c557600080fd5b80631e306772146100ae578063200d2ed2146100ca578063566b7de8146100d357806369c8d338146101325780639d76ea581461015d575b600080fd5b6100b760065481565b6040519081526020015b60405180910390f35b6100b760075481565b6101306100e13660046104b9565b600180546001600160a01b03199081166001600160a01b039889161790915560028054821696881696909617909555600380549095169390951692909217909255600491909155600555600655565b005b600254610145906001600160a01b031681565b6040516001600160a01b0390911681526020016100c1565b600054610145906001600160a01b031681565b600154610145906001600160a01b031681565b6100b760045481565b600354610145906001600160a01b031681565b6101306101ad366004610529565b6101ce565b6101306101c0366004610592565b6103ee565b6100b760055481565b6006546040805160008152602081018083529290925260ff881690820152606081018690526080810185905260019060a0016020604051602081039080840390855afa158015610222573d6000803e3d6000fd5b5050604051601f1901516001546001600160a01b0390811691161490506102905760405162461bcd60e51b815260206004820152601860248201527f496e76616c6964204c656e646572205369676e6174757265000000000000000060448201526064015b60405180910390fd5b6006546040805160008152602081018083529290925260ff851690820152606081018390526080810182905260019060a0016020604051602081039080840390855afa1580156102e4573d6000803e3d6000fd5b5050604051601f1901516002546001600160a01b03908116911614905061034d5760405162461bcd60e51b815260206004820152601b60248201527f496e76616c696420417262697472616765205369676e617475726500000000006044820152606401610287565b600054600154600354600480546040516323b872dd60e01b81526001600160a01b03948516928101929092529183166024820152604481019190915291169081906323b872dd906064016020604051808303816000875af11580156103b6573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906103da91906105b6565b156103e55760016007555b50505050505050565b60045481156104075760055461040490826105d3565b90505b6000546003546001546040516323b872dd60e01b81526001600160a01b03928316600482015290821660248201526044810184905291169081906323b872dd906064016020604051808303816000875af1158015610469573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061048d91906105b6565b156104985760026007555b505050565b80356001600160a01b03811681146104b457600080fd5b919050565b60008060008060008060c087890312156104d257600080fd5b6104db8761049d565b95506104e96020880161049d565b94506104f76040880161049d565b9350606087013592506080870135915060a087013590509295509295509295565b803560ff811681146104b457600080fd5b60008060008060008060c0878903121561054257600080fd5b61054b87610518565b9550602087013594506040870135935061056760608801610518565b92506080870135915060a087013590509295509295509295565b801515811461058f57600080fd5b50565b6000602082840312156105a457600080fd5b81356105af81610581565b9392505050565b6000602082840312156105c857600080fd5b81516105af81610581565b600082198211156105f457634e487b7160e01b600052601160045260246000fd5b50019056fea2646970667358221220ef34e221d768bb84dadbd96a98a50f016eaf57e2d93deed1b74a56c887439ced64736f6c634300080b0033",
 }
 
+// LenderABI is the input ABI used to generate the binding from.
+// Deprecated: Use LenderMetaData.ABI instead.
+var LenderABI = LenderMetaData.ABI
+
+// Deprecated: Use LenderMetaData.Sigs instead.
+// LenderFuncSigs maps the 4-byte function signature to its string representation.
+var LenderFuncSigs = LenderMetaData.Sigs
+
 // LenderBin is the compiled bytecode used for deploying new contracts.
-var LenderBin = "0x608060405234801561001057600080fd5b5060405161045f38038061045f8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b03199092169190911790556103fa806100656000396000f3fe608060405234801561001057600080fd5b50600436106100a95760003560e01c8063bcead63e11610071578063bcead63e14610146578063d285b7b41461014e578063d2f7265a14610156578063fa5f40341461015e578063fbd3f3ce146101a0578063ffbe7402146101bf576100a9565b80631e306772146100ae578063200d2ed2146100c8578063566b7de8146100d057806369c8d3381461011a5780639d76ea581461013e575b600080fd5b6100b66101c7565b60408051918252519081900360200190f35b6100b66101cd565b610118600480360360c08110156100e657600080fd5b506001600160a01b03813581169160208101358216916040820135169060608101359060808101359060a001356101d3565b005b610122610222565b604080516001600160a01b039092168252519081900360200190f35b610122610231565b610122610240565b6100b661024f565b610122610255565b610118600480360360c081101561017457600080fd5b5060ff813581169160208101359160408201359160608101359091169060808101359060a00135610264565b610118600480360360208110156101b657600080fd5b5035151561030f565b6100b66103bf565b60065481565b60075481565b600180546001600160a01b03199081166001600160a01b039889161790915560028054821696881696909617909555600380549095169390951692909217909255600491909155600555600655565b6002546001600160a01b031681565b6000546001600160a01b031681565b6001546001600160a01b031681565b60045481565b6003546001600160a01b031681565b6000805460015460035460048054604080516323b872dd60e01b81526001600160a01b0395861693810193909352928416602483015260448201529051919092169283926323b872dd9260648083019360209383900390910190829087803b1580156102cf57600080fd5b505af11580156102e3573d6000803e3d6000fd5b505050506040513d60208110156102f957600080fd5b5051156103065760016007555b50505050505050565b600454811561031d57600554015b60008054600354600154604080516323b872dd60e01b81526001600160a01b03938416600482015291831660248301526044820186905251919092169283926323b872dd9260648083019360209383900390910190829087803b15801561038357600080fd5b505af1158015610397573d6000803e3d6000fd5b505050506040513d60208110156103ad57600080fd5b5051156103ba5760026007555b505050565b6005548156fea265627a7a72315820daf9376c900ee6273bada3705b9688fab696adb8a1a687646cc1d9712ceeeb0d64736f6c63430005110032"
+// Deprecated: Use LenderMetaData.Bin instead.
+var LenderBin = LenderMetaData.Bin
 
 // DeployLender deploys a new Ethereum contract, binding an instance of Lender to it.
 func DeployLender(auth *bind.TransactOpts, backend bind.ContractBackend, tokenAddress_ common.Address) (common.Address, *types.Transaction, *Lender, error) {
-	parsed, err := abi.JSON(strings.NewReader(LenderABI))
+	parsed, err := LenderMetaData.GetAbi()
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
+	if parsed == nil {
+		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
+	}
 
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(LenderBin), backend, tokenAddress_)
+	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(LenderBin), backend, tokenAddress_)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -487,7 +525,7 @@ func bindLender(address common.Address, caller bind.ContractCaller, transactor b
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Lender *LenderRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_Lender *LenderRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _Lender.Contract.LenderCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -506,7 +544,7 @@ func (_Lender *LenderRaw) Transact(opts *bind.TransactOpts, method string, param
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Lender *LenderCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_Lender *LenderCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _Lender.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -523,208 +561,248 @@ func (_Lender *LenderTransactorRaw) Transact(opts *bind.TransactOpts, method str
 
 // Arbitrage is a free data retrieval call binding the contract method 0x69c8d338.
 //
-// Solidity: function arbitrage() constant returns(address)
+// Solidity: function arbitrage() view returns(address)
 func (_Lender *LenderCaller) Arbitrage(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "arbitrage")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "arbitrage")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Arbitrage is a free data retrieval call binding the contract method 0x69c8d338.
 //
-// Solidity: function arbitrage() constant returns(address)
+// Solidity: function arbitrage() view returns(address)
 func (_Lender *LenderSession) Arbitrage() (common.Address, error) {
 	return _Lender.Contract.Arbitrage(&_Lender.CallOpts)
 }
 
 // Arbitrage is a free data retrieval call binding the contract method 0x69c8d338.
 //
-// Solidity: function arbitrage() constant returns(address)
+// Solidity: function arbitrage() view returns(address)
 func (_Lender *LenderCallerSession) Arbitrage() (common.Address, error) {
 	return _Lender.Contract.Arbitrage(&_Lender.CallOpts)
 }
 
 // Exchange is a free data retrieval call binding the contract method 0xd2f7265a.
 //
-// Solidity: function exchange() constant returns(address)
+// Solidity: function exchange() view returns(address)
 func (_Lender *LenderCaller) Exchange(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "exchange")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "exchange")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Exchange is a free data retrieval call binding the contract method 0xd2f7265a.
 //
-// Solidity: function exchange() constant returns(address)
+// Solidity: function exchange() view returns(address)
 func (_Lender *LenderSession) Exchange() (common.Address, error) {
 	return _Lender.Contract.Exchange(&_Lender.CallOpts)
 }
 
 // Exchange is a free data retrieval call binding the contract method 0xd2f7265a.
 //
-// Solidity: function exchange() constant returns(address)
+// Solidity: function exchange() view returns(address)
 func (_Lender *LenderCallerSession) Exchange() (common.Address, error) {
 	return _Lender.Contract.Exchange(&_Lender.CallOpts)
 }
 
 // Intrest is a free data retrieval call binding the contract method 0xffbe7402.
 //
-// Solidity: function intrest() constant returns(uint256)
+// Solidity: function intrest() view returns(uint256)
 func (_Lender *LenderCaller) Intrest(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "intrest")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "intrest")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Intrest is a free data retrieval call binding the contract method 0xffbe7402.
 //
-// Solidity: function intrest() constant returns(uint256)
+// Solidity: function intrest() view returns(uint256)
 func (_Lender *LenderSession) Intrest() (*big.Int, error) {
 	return _Lender.Contract.Intrest(&_Lender.CallOpts)
 }
 
 // Intrest is a free data retrieval call binding the contract method 0xffbe7402.
 //
-// Solidity: function intrest() constant returns(uint256)
+// Solidity: function intrest() view returns(uint256)
 func (_Lender *LenderCallerSession) Intrest() (*big.Int, error) {
 	return _Lender.Contract.Intrest(&_Lender.CallOpts)
 }
 
 // Lender is a free data retrieval call binding the contract method 0xbcead63e.
 //
-// Solidity: function lender() constant returns(address)
+// Solidity: function lender() view returns(address)
 func (_Lender *LenderCaller) Lender(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "lender")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "lender")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Lender is a free data retrieval call binding the contract method 0xbcead63e.
 //
-// Solidity: function lender() constant returns(address)
+// Solidity: function lender() view returns(address)
 func (_Lender *LenderSession) Lender() (common.Address, error) {
 	return _Lender.Contract.Lender(&_Lender.CallOpts)
 }
 
 // Lender is a free data retrieval call binding the contract method 0xbcead63e.
 //
-// Solidity: function lender() constant returns(address)
+// Solidity: function lender() view returns(address)
 func (_Lender *LenderCallerSession) Lender() (common.Address, error) {
 	return _Lender.Contract.Lender(&_Lender.CallOpts)
 }
 
 // Loan is a free data retrieval call binding the contract method 0xd285b7b4.
 //
-// Solidity: function loan() constant returns(uint256)
+// Solidity: function loan() view returns(uint256)
 func (_Lender *LenderCaller) Loan(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "loan")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "loan")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Loan is a free data retrieval call binding the contract method 0xd285b7b4.
 //
-// Solidity: function loan() constant returns(uint256)
+// Solidity: function loan() view returns(uint256)
 func (_Lender *LenderSession) Loan() (*big.Int, error) {
 	return _Lender.Contract.Loan(&_Lender.CallOpts)
 }
 
 // Loan is a free data retrieval call binding the contract method 0xd285b7b4.
 //
-// Solidity: function loan() constant returns(uint256)
+// Solidity: function loan() view returns(uint256)
 func (_Lender *LenderCallerSession) Loan() (*big.Int, error) {
 	return _Lender.Contract.Loan(&_Lender.CallOpts)
 }
 
 // LoanHash is a free data retrieval call binding the contract method 0x1e306772.
 //
-// Solidity: function loanHash() constant returns(bytes32)
+// Solidity: function loanHash() view returns(bytes32)
 func (_Lender *LenderCaller) LoanHash(opts *bind.CallOpts) ([32]byte, error) {
-	var (
-		ret0 = new([32]byte)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "loanHash")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "loanHash")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
 }
 
 // LoanHash is a free data retrieval call binding the contract method 0x1e306772.
 //
-// Solidity: function loanHash() constant returns(bytes32)
+// Solidity: function loanHash() view returns(bytes32)
 func (_Lender *LenderSession) LoanHash() ([32]byte, error) {
 	return _Lender.Contract.LoanHash(&_Lender.CallOpts)
 }
 
 // LoanHash is a free data retrieval call binding the contract method 0x1e306772.
 //
-// Solidity: function loanHash() constant returns(bytes32)
+// Solidity: function loanHash() view returns(bytes32)
 func (_Lender *LenderCallerSession) LoanHash() ([32]byte, error) {
 	return _Lender.Contract.LoanHash(&_Lender.CallOpts)
 }
 
 // Status is a free data retrieval call binding the contract method 0x200d2ed2.
 //
-// Solidity: function status() constant returns(uint256)
+// Solidity: function status() view returns(uint256)
 func (_Lender *LenderCaller) Status(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "status")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "status")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Status is a free data retrieval call binding the contract method 0x200d2ed2.
 //
-// Solidity: function status() constant returns(uint256)
+// Solidity: function status() view returns(uint256)
 func (_Lender *LenderSession) Status() (*big.Int, error) {
 	return _Lender.Contract.Status(&_Lender.CallOpts)
 }
 
 // Status is a free data retrieval call binding the contract method 0x200d2ed2.
 //
-// Solidity: function status() constant returns(uint256)
+// Solidity: function status() view returns(uint256)
 func (_Lender *LenderCallerSession) Status() (*big.Int, error) {
 	return _Lender.Contract.Status(&_Lender.CallOpts)
 }
 
 // TokenAddress is a free data retrieval call binding the contract method 0x9d76ea58.
 //
-// Solidity: function tokenAddress() constant returns(address)
+// Solidity: function tokenAddress() view returns(address)
 func (_Lender *LenderCaller) TokenAddress(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Lender.contract.Call(opts, out, "tokenAddress")
-	return *ret0, err
+	var out []interface{}
+	err := _Lender.contract.Call(opts, &out, "tokenAddress")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // TokenAddress is a free data retrieval call binding the contract method 0x9d76ea58.
 //
-// Solidity: function tokenAddress() constant returns(address)
+// Solidity: function tokenAddress() view returns(address)
 func (_Lender *LenderSession) TokenAddress() (common.Address, error) {
 	return _Lender.Contract.TokenAddress(&_Lender.CallOpts)
 }
 
 // TokenAddress is a free data retrieval call binding the contract method 0x9d76ea58.
 //
-// Solidity: function tokenAddress() constant returns(address)
+// Solidity: function tokenAddress() view returns(address)
 func (_Lender *LenderCallerSession) TokenAddress() (common.Address, error) {
 	return _Lender.Contract.TokenAddress(&_Lender.CallOpts)
 }

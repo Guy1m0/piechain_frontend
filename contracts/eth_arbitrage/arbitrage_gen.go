@@ -4,6 +4,7 @@
 package eth_arbitrage
 
 import (
+	"errors"
 	"math/big"
 	"strings"
 
@@ -17,43 +18,54 @@ import (
 
 // Reference imports to suppress errors if they are not otherwise used.
 var (
+	_ = errors.New
 	_ = big.NewInt
 	_ = strings.NewReader
 	_ = ethereum.NotFound
-	_ = abi.U256
 	_ = bind.Bind
 	_ = common.Big1
 	_ = types.BloomLookup
 	_ = event.NewSubscription
 )
 
-// AMMABI is the input ABI used to generate the binding from.
-const AMMABI = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token1_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token2_\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"exchange1to2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"exchange2to1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"rate1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"rate2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"rate1_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rate2_\",\"type\":\"uint256\"}],\"name\":\"setRate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token1Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token2Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
-
-var AMMParsedABI, _ = abi.JSON(strings.NewReader(AMMABI))
-
-// AMMFuncSigs maps the 4-byte function signature to its string representation.
-var AMMFuncSigs = map[string]string{
-	"3ede9696": "exchange1to2(uint256)",
-	"d030f9e5": "exchange2to1(uint256)",
-	"cf854969": "rate1()",
-	"f555b815": "rate2()",
-	"46df2ccb": "setRate(uint256,uint256)",
-	"d7cb416f": "token1Address()",
-	"2456af82": "token2Address()",
+// AMMMetaData contains all meta data concerning the AMM contract.
+var AMMMetaData = &bind.MetaData{
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token1_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token2_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"exchange1to2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"exchange2to1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rate1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rate2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"rate1_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rate2_\",\"type\":\"uint256\"}],\"name\":\"setRate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token1Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token2Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	Sigs: map[string]string{
+		"3ede9696": "exchange1to2(uint256)",
+		"d030f9e5": "exchange2to1(uint256)",
+		"cf854969": "rate1()",
+		"f555b815": "rate2()",
+		"46df2ccb": "setRate(uint256,uint256)",
+		"d7cb416f": "token1Address()",
+		"2456af82": "token2Address()",
+	},
+	Bin: "0x608060405234801561001057600080fd5b506040516104d83803806104d883398101604081905261002f9161007c565b600280546001600160a01b039384166001600160a01b031991821617909155600380549290931691161790556100af565b80516001600160a01b038116811461007757600080fd5b919050565b6000806040838503121561008f57600080fd5b61009883610060565b91506100a660208401610060565b90509250929050565b61041a806100be6000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c8063cf8549691161005b578063cf854969146100ee578063d030f9e5146100f7578063d7cb416f1461010a578063f555b8151461011d57600080fd5b80632456af82146100825780633ede9696146100b257806346df2ccb146100d3575b600080fd5b600354610095906001600160a01b031681565b6040516001600160a01b0390911681526020015b60405180910390f35b6100c56100c0366004610331565b610126565b6040519081526020016100a9565b6100ec6100e136600461034a565b600091909155600155565b005b6100c560005481565b6100c5610105366004610331565b610250565b600254610095906001600160a01b031681565b6100c560015481565b6002546003546000805460015491936001600160a01b03908116931691849190610150908761036c565b61015a9190610399565b6040516323b872dd60e01b8152336004820152306024820152604481018790529091506001600160a01b038416906323b872dd906064016020604051808303816000875af11580156101b0573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101d491906103bb565b5060405163a9059cbb60e01b8152336004820152602481018290526001600160a01b0383169063a9059cbb906044015b6020604051808303816000875af1158015610223573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061024791906103bb565b50949350505050565b6002546003546001546000805490936001600160a01b039081169316918491610279908761036c565b6102839190610399565b6040516323b872dd60e01b8152336004820152306024820152604481018790529091506001600160a01b038316906323b872dd906064016020604051808303816000875af11580156102d9573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906102fd91906103bb565b5060405163a9059cbb60e01b8152336004820152602481018290526001600160a01b0384169063a9059cbb90604401610204565b60006020828403121561034357600080fd5b5035919050565b6000806040838503121561035d57600080fd5b50508035926020909101359150565b600081600019048311821515161561039457634e487b7160e01b600052601160045260246000fd5b500290565b6000826103b657634e487b7160e01b600052601260045260246000fd5b500490565b6000602082840312156103cd57600080fd5b815180151581146103dd57600080fd5b939250505056fea26469706673582212206f36fb0d3de5ff99b82982171ff332c898aac1463e2ac85a9e5c43b2750cb6a164736f6c634300080b0033",
 }
 
+// AMMABI is the input ABI used to generate the binding from.
+// Deprecated: Use AMMMetaData.ABI instead.
+var AMMABI = AMMMetaData.ABI
+
+// Deprecated: Use AMMMetaData.Sigs instead.
+// AMMFuncSigs maps the 4-byte function signature to its string representation.
+var AMMFuncSigs = AMMMetaData.Sigs
+
 // AMMBin is the compiled bytecode used for deploying new contracts.
-var AMMBin = "0x608060405234801561001057600080fd5b506040516104473803806104478339818101604052604081101561003357600080fd5b508051602090910151600280546001600160a01b039384166001600160a01b031991821617909155600380549390921692169190911790556103cd8061007a6000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c8063cf8549691161005b578063cf854969146100fa578063d030f9e514610102578063d7cb416f1461011f578063f555b815146101275761007d565b80632456af82146100825780633ede9696146100a657806346df2ccb146100d5575b600080fd5b61008a61012f565b604080516001600160a01b039092168252519081900360200190f35b6100c3600480360360208110156100bc57600080fd5b503561013e565b60408051918252519081900360200190f35b6100f8600480360360408110156100eb57600080fd5b5080359060200135610273565b005b6100c361027e565b6100c36004803603602081101561011857600080fd5b5035610284565b61008a610383565b6100c3610392565b6003546001600160a01b031681565b6002546003546000805460015491936001600160a01b0390811693169184919086028161016757fe5b604080516323b872dd60e01b81523360048201523060248201526044810189905290519290910492506001600160a01b038516916323b872dd916064808201926020929091908290030181600087803b1580156101c357600080fd5b505af11580156101d7573d6000803e3d6000fd5b505050506040513d60208110156101ed57600080fd5b50506040805163a9059cbb60e01b81523360048201526024810183905290516001600160a01b0384169163a9059cbb9160448083019260209291908290030181600087803b15801561023e57600080fd5b505af1158015610252573d6000803e3d6000fd5b505050506040513d602081101561026857600080fd5b509095945050505050565b600091909155600155565b60005481565b6002546003546001546000805490936001600160a01b0390811693169184918602816102ac57fe5b604080516323b872dd60e01b81523360048201523060248201526044810189905290519290910492506001600160a01b038416916323b872dd916064808201926020929091908290030181600087803b15801561030857600080fd5b505af115801561031c573d6000803e3d6000fd5b505050506040513d602081101561033257600080fd5b50506040805163a9059cbb60e01b81523360048201526024810183905290516001600160a01b0385169163a9059cbb9160448083019260209291908290030181600087803b15801561023e57600080fd5b6002546001600160a01b031681565b6001548156fea265627a7a72315820d5e3a2c8421803bf076ea196a9b3a1858264d236ee44d67c2214ed2d21d4831a64736f6c63430005110032"
+// Deprecated: Use AMMMetaData.Bin instead.
+var AMMBin = AMMMetaData.Bin
 
 // DeployAMM deploys a new Ethereum contract, binding an instance of AMM to it.
 func DeployAMM(auth *bind.TransactOpts, backend bind.ContractBackend, token1_ common.Address, token2_ common.Address) (common.Address, *types.Transaction, *AMM, error) {
-	parsed, err := abi.JSON(strings.NewReader(AMMABI))
+	parsed, err := AMMMetaData.GetAbi()
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
+	if parsed == nil {
+		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
+	}
 
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(AMMBin), backend, token1_, token2_)
+	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(AMMBin), backend, token1_, token2_)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -168,7 +180,7 @@ func bindAMM(address common.Address, caller bind.ContractCaller, transactor bind
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_AMM *AMMRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_AMM *AMMRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _AMM.Contract.AMMCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -187,7 +199,7 @@ func (_AMM *AMMRaw) Transact(opts *bind.TransactOpts, method string, params ...i
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_AMM *AMMCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_AMM *AMMCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _AMM.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -204,104 +216,124 @@ func (_AMM *AMMTransactorRaw) Transact(opts *bind.TransactOpts, method string, p
 
 // Rate1 is a free data retrieval call binding the contract method 0xcf854969.
 //
-// Solidity: function rate1() constant returns(uint256)
+// Solidity: function rate1() view returns(uint256)
 func (_AMM *AMMCaller) Rate1(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _AMM.contract.Call(opts, out, "rate1")
-	return *ret0, err
+	var out []interface{}
+	err := _AMM.contract.Call(opts, &out, "rate1")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Rate1 is a free data retrieval call binding the contract method 0xcf854969.
 //
-// Solidity: function rate1() constant returns(uint256)
+// Solidity: function rate1() view returns(uint256)
 func (_AMM *AMMSession) Rate1() (*big.Int, error) {
 	return _AMM.Contract.Rate1(&_AMM.CallOpts)
 }
 
 // Rate1 is a free data retrieval call binding the contract method 0xcf854969.
 //
-// Solidity: function rate1() constant returns(uint256)
+// Solidity: function rate1() view returns(uint256)
 func (_AMM *AMMCallerSession) Rate1() (*big.Int, error) {
 	return _AMM.Contract.Rate1(&_AMM.CallOpts)
 }
 
 // Rate2 is a free data retrieval call binding the contract method 0xf555b815.
 //
-// Solidity: function rate2() constant returns(uint256)
+// Solidity: function rate2() view returns(uint256)
 func (_AMM *AMMCaller) Rate2(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _AMM.contract.Call(opts, out, "rate2")
-	return *ret0, err
+	var out []interface{}
+	err := _AMM.contract.Call(opts, &out, "rate2")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Rate2 is a free data retrieval call binding the contract method 0xf555b815.
 //
-// Solidity: function rate2() constant returns(uint256)
+// Solidity: function rate2() view returns(uint256)
 func (_AMM *AMMSession) Rate2() (*big.Int, error) {
 	return _AMM.Contract.Rate2(&_AMM.CallOpts)
 }
 
 // Rate2 is a free data retrieval call binding the contract method 0xf555b815.
 //
-// Solidity: function rate2() constant returns(uint256)
+// Solidity: function rate2() view returns(uint256)
 func (_AMM *AMMCallerSession) Rate2() (*big.Int, error) {
 	return _AMM.Contract.Rate2(&_AMM.CallOpts)
 }
 
 // Token1Address is a free data retrieval call binding the contract method 0xd7cb416f.
 //
-// Solidity: function token1Address() constant returns(address)
+// Solidity: function token1Address() view returns(address)
 func (_AMM *AMMCaller) Token1Address(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _AMM.contract.Call(opts, out, "token1Address")
-	return *ret0, err
+	var out []interface{}
+	err := _AMM.contract.Call(opts, &out, "token1Address")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Token1Address is a free data retrieval call binding the contract method 0xd7cb416f.
 //
-// Solidity: function token1Address() constant returns(address)
+// Solidity: function token1Address() view returns(address)
 func (_AMM *AMMSession) Token1Address() (common.Address, error) {
 	return _AMM.Contract.Token1Address(&_AMM.CallOpts)
 }
 
 // Token1Address is a free data retrieval call binding the contract method 0xd7cb416f.
 //
-// Solidity: function token1Address() constant returns(address)
+// Solidity: function token1Address() view returns(address)
 func (_AMM *AMMCallerSession) Token1Address() (common.Address, error) {
 	return _AMM.Contract.Token1Address(&_AMM.CallOpts)
 }
 
 // Token2Address is a free data retrieval call binding the contract method 0x2456af82.
 //
-// Solidity: function token2Address() constant returns(address)
+// Solidity: function token2Address() view returns(address)
 func (_AMM *AMMCaller) Token2Address(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _AMM.contract.Call(opts, out, "token2Address")
-	return *ret0, err
+	var out []interface{}
+	err := _AMM.contract.Call(opts, &out, "token2Address")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Token2Address is a free data retrieval call binding the contract method 0x2456af82.
 //
-// Solidity: function token2Address() constant returns(address)
+// Solidity: function token2Address() view returns(address)
 func (_AMM *AMMSession) Token2Address() (common.Address, error) {
 	return _AMM.Contract.Token2Address(&_AMM.CallOpts)
 }
 
 // Token2Address is a free data retrieval call binding the contract method 0x2456af82.
 //
-// Solidity: function token2Address() constant returns(address)
+// Solidity: function token2Address() view returns(address)
 func (_AMM *AMMCallerSession) Token2Address() (common.Address, error) {
 	return _AMM.Contract.Token2Address(&_AMM.CallOpts)
 }
@@ -369,40 +401,51 @@ func (_AMM *AMMTransactorSession) SetRate(rate1_ *big.Int, rate2_ *big.Int) (*ty
 	return _AMM.Contract.SetRate(&_AMM.TransactOpts, rate1_, rate2_)
 }
 
-// ArbitrageABI is the input ABI used to generate the binding from.
-const ArbitrageABI = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token1_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token2_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"amm1_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"amm2_\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":true,\"inputs\":[],\"name\":\"amm1Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"amm2Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"arbitrageur\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"exchange\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"vl\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"rl\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sl\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"va\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"ra\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sa\",\"type\":\"bytes32\"}],\"name\":\"execute\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"intrest\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"lender\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"loan\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"loanHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"rollback\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"lender_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"arbitrageur_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"exchange_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"intrest_\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"loanHash_\",\"type\":\"bytes32\"}],\"name\":\"setup\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"status\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token1Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token2Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
-
-var ArbitrageParsedABI, _ = abi.JSON(strings.NewReader(ArbitrageABI))
-
-// ArbitrageFuncSigs maps the 4-byte function signature to its string representation.
-var ArbitrageFuncSigs = map[string]string{
-	"472fa96c": "amm1Address()",
-	"87700c1d": "amm2Address()",
-	"b3115c5c": "arbitrageur()",
-	"d2f7265a": "exchange()",
-	"99d94b0f": "execute(uint8,bytes32,bytes32,uint8,bytes32,bytes32)",
-	"ffbe7402": "intrest()",
-	"bcead63e": "lender()",
-	"d285b7b4": "loan()",
-	"1e306772": "loanHash()",
-	"9afd9d78": "rollback()",
-	"566b7de8": "setup(address,address,address,uint256,uint256,bytes32)",
-	"200d2ed2": "status()",
-	"d7cb416f": "token1Address()",
-	"2456af82": "token2Address()",
+// ArbitrageMetaData contains all meta data concerning the Arbitrage contract.
+var ArbitrageMetaData = &bind.MetaData{
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token1_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"token2_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"amm1_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"amm2_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"amm1Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"amm2Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"arbitrageur\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"exchange\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"vl\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"rl\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sl\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"va\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"ra\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"sa\",\"type\":\"bytes32\"}],\"name\":\"execute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"intrest\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lender\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"loan\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"loanHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rollback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"lender_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"arbitrageur_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"exchange_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"loan_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"intrest_\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"loanHash_\",\"type\":\"bytes32\"}],\"name\":\"setup\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"status\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token1Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token2Address\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	Sigs: map[string]string{
+		"472fa96c": "amm1Address()",
+		"87700c1d": "amm2Address()",
+		"b3115c5c": "arbitrageur()",
+		"d2f7265a": "exchange()",
+		"99d94b0f": "execute(uint8,bytes32,bytes32,uint8,bytes32,bytes32)",
+		"ffbe7402": "intrest()",
+		"bcead63e": "lender()",
+		"d285b7b4": "loan()",
+		"1e306772": "loanHash()",
+		"9afd9d78": "rollback()",
+		"566b7de8": "setup(address,address,address,uint256,uint256,bytes32)",
+		"200d2ed2": "status()",
+		"d7cb416f": "token1Address()",
+		"2456af82": "token2Address()",
+	},
+	Bin: "0x608060405234801561001057600080fd5b50604051610b27380380610b2783398101604081905261002f9161009e565b600080546001600160a01b039586166001600160a01b03199182161790915560018054948616948216949094179093556002805492851692841692909217909155600380549190931691161790556100f2565b80516001600160a01b038116811461009957600080fd5b919050565b600080600080608085870312156100b457600080fd5b6100bd85610082565b93506100cb60208601610082565b92506100d960408601610082565b91506100e760608601610082565b905092959194509250565b610a26806101016000396000f3fe608060405234801561001057600080fd5b50600436106100ea5760003560e01c80639afd9d781161008c578063d285b7b411610066578063d285b7b414610228578063d2f7265a14610231578063d7cb416f14610244578063ffbe74021461025757600080fd5b80639afd9d78146101fa578063b3115c5c14610202578063bcead63e1461021557600080fd5b8063472fa96c116100c8578063472fa96c14610155578063566b7de81461016857806387700c1d146101d457806399d94b0f146101e757600080fd5b80631e306772146100ef578063200d2ed21461010b5780632456af821461012a575b600080fd5b6100f860095481565b6040519081526020015b60405180910390f35b600a546101189060ff1681565b60405160ff9091168152602001610102565b60015461013d906001600160a01b031681565b6040516001600160a01b039091168152602001610102565b60025461013d906001600160a01b031681565b6101d26101763660046108a1565b600480546001600160a01b03199081166001600160a01b039889161790915560058054821696881696909617909555600680549095169390951692909217909255600992909255600755600855600a805460ff19166001179055565b005b60035461013d906001600160a01b031681565b6101d26101f5366004610911565b610260565b6101d2610791565b60055461013d906001600160a01b031681565b60045461013d906001600160a01b031681565b6100f860075481565b60065461013d906001600160a01b031681565b60005461013d906001600160a01b031681565b6100f860085481565b600954604080516000808252602082018084529390935260ff891691810191909152606081018790526080810186905260019060a0016020604051602081039080840390855afa1580156102b8573d6000803e3d6000fd5b5050506020604051035190506000600160095486868660405160008152602001604052604051610304949392919093845260ff9290921660208401526040830152606082015260800190565b6020604051602081039080840390855afa158015610326573d6000803e3d6000fd5b5050604051601f1901516004549092506001600160a01b0384811691161490506103975760405162461bcd60e51b815260206004820152601860248201527f696e76616c6964206c656e646572207369676e6174757265000000000000000060448201526064015b60405180910390fd5b6005546001600160a01b038281169116146103f45760405162461bcd60e51b815260206004820152601d60248201527f696e76616c6964206172626974726167657572207369676e6174757265000000604482015260640161038e565b60025460035460005460015460075460405163095ea7b360e01b81526001600160a01b039586166004820181905260248201929092529094938416939283169290911690829063095ea7b3906044016020604051808303816000875af1158015610462573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104869190610969565b50600754604051631f6f4b4b60e11b81526000916001600160a01b03871691633ede9696916104bb9160040190815260200190565b6020604051808303816000875af11580156104da573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104fe9190610992565b60035460405163095ea7b360e01b81526001600160a01b0391821660048201526024810183905291925083169063095ea7b3906044016020604051808303816000875af1158015610553573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105779190610969565b5060405163d030f9e560e01b8152600481018290526000906001600160a01b0386169063d030f9e5906024016020604051808303816000875af11580156105c2573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105e69190610992565b90506008546007546105f891906109c1565b811161063a5760405162461bcd60e51b81526020600482015260116024820152701b9bdd08195b9bdd59da081c1c9bd99a5d607a1b604482015260640161038e565b6006546008546007546001600160a01b038088169363a9059cbb9391169161066291906109c1565b6040516001600160e01b031960e085901b1681526001600160a01b03909216600483015260248201526044016020604051808303816000875af11580156106ad573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106d19190610969565b506005546008546007546001600160a01b038088169363a9059cbb939116916106fa90866109d9565b61070491906109d9565b6040516001600160e01b031960e085901b1681526001600160a01b03909216600483015260248201526044016020604051808303816000875af115801561074f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906107739190610969565b5050600a805460ff1916600217905550505050505050505050505050565b6006546001600160a01b03163314806107b457506005546001600160a01b031633145b6107f65760405162461bcd60e51b8152602060048201526013602482015272191bdb89dd081a185d9948185c1c1c9bdd985b606a1b604482015260640161038e565b60005460065460075460405163a9059cbb60e01b81526001600160a01b0392831660048201526024810191909152911690819063a9059cbb906044016020604051808303816000875af1158015610851573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906108759190610969565b5050600a805460ff191681179055565b80356001600160a01b038116811461089c57600080fd5b919050565b60008060008060008060c087890312156108ba57600080fd5b6108c387610885565b95506108d160208801610885565b94506108df60408801610885565b9350606087013592506080870135915060a087013590509295509295509295565b803560ff8116811461089c57600080fd5b60008060008060008060c0878903121561092a57600080fd5b61093387610900565b9550602087013594506040870135935061094f60608801610900565b92506080870135915060a087013590509295509295509295565b60006020828403121561097b57600080fd5b8151801515811461098b57600080fd5b9392505050565b6000602082840312156109a457600080fd5b5051919050565b634e487b7160e01b600052601160045260246000fd5b600082198211156109d4576109d46109ab565b500190565b6000828210156109eb576109eb6109ab565b50039056fea2646970667358221220abe3b417486219c87dfe5e679ae89fe666a5a314904688a0b518163d3edb658164736f6c634300080b0033",
 }
 
+// ArbitrageABI is the input ABI used to generate the binding from.
+// Deprecated: Use ArbitrageMetaData.ABI instead.
+var ArbitrageABI = ArbitrageMetaData.ABI
+
+// Deprecated: Use ArbitrageMetaData.Sigs instead.
+// ArbitrageFuncSigs maps the 4-byte function signature to its string representation.
+var ArbitrageFuncSigs = ArbitrageMetaData.Sigs
+
 // ArbitrageBin is the compiled bytecode used for deploying new contracts.
-var ArbitrageBin = "0x608060405234801561001057600080fd5b506040516108743803806108748339818101604052608081101561003357600080fd5b50805160208201516040830151606090930151600080546001600160a01b039485166001600160a01b03199182161790915560018054938516938216939093179092556002805494841694831694909417909355600380549290931691161790556107d1806100a36000396000f3fe608060405234801561001057600080fd5b50600436106100ea5760003560e01c80639afd9d781161008c578063d285b7b411610066578063d285b7b4146101ff578063d2f7265a14610207578063d7cb416f1461020f578063ffbe740214610217576100ea565b80639afd9d78146101e7578063b3115c5c146101ef578063bcead63e146101f7576100ea565b8063472fa96c116100c8578063472fa96c1461014b578063566b7de81461015357806387700c1d1461019d57806399d94b0f146101a5576100ea565b80631e306772146100ef578063200d2ed2146101095780632456af8214610127575b600080fd5b6100f761021f565b60408051918252519081900360200190f35b610111610225565b6040805160ff9092168252519081900360200190f35b61012f61022e565b604080516001600160a01b039092168252519081900360200190f35b61012f61023d565b61019b600480360360c081101561016957600080fd5b506001600160a01b03813581169160208101358216916040820135169060608101359060808101359060a0013561024c565b005b61012f6102a8565b61019b600480360360c08110156101bb57600080fd5b5060ff813581169160208101359160408201359160608101359091169060808101359060a001356102b7565b61019b610650565b61012f610754565b61012f610763565b6100f7610772565b61012f610778565b61012f610787565b6100f7610796565b60095481565b600a5460ff1681565b6001546001600160a01b031681565b6002546001600160a01b031681565b600480546001600160a01b03199081166001600160a01b039889161790915560058054821696881696909617909555600680549095169390951692909217909255600992909255600755600855600a805460ff19166001179055565b6003546001600160a01b031681565b600254600354600080546001546007546040805163095ea7b360e01b81526001600160a01b039788166004820181905260248201939093529051919695861695938416949390921692849263095ea7b39260448083019360209383900390910190829087803b15801561032957600080fd5b505af115801561033d573d6000803e3d6000fd5b505050506040513d602081101561035357600080fd5b505060075460408051631f6f4b4b60e11b81526004810192909252516000916001600160a01b03871691633ede96969160248082019260209290919082900301818787803b1580156103a457600080fd5b505af11580156103b8573d6000803e3d6000fd5b505050506040513d60208110156103ce57600080fd5b50516003546040805163095ea7b360e01b81526001600160a01b0392831660048201526024810184905290519293509084169163095ea7b3916044808201926020929091908290030181600087803b15801561042957600080fd5b505af115801561043d573d6000803e3d6000fd5b505050506040513d602081101561045357600080fd5b50506040805163d030f9e560e01b81526004810183905290516000916001600160a01b0387169163d030f9e59160248082019260209290919082900301818787803b1580156104a157600080fd5b505af11580156104b5573d6000803e3d6000fd5b505050506040513d60208110156104cb57600080fd5b505160085460075491925001811161051e576040805162461bcd60e51b81526020600482015260116024820152701b9bdd08195b9bdd59da081c1c9bd99a5d607a1b604482015290519081900360640190fd5b6006546008546007546040805163a9059cbb60e01b81526001600160a01b03948516600482015291909201602482015290519186169163a9059cbb916044808201926020929091908290030181600087803b15801561057c57600080fd5b505af1158015610590573d6000803e3d6000fd5b505050506040513d60208110156105a657600080fd5b50506005546008546007546040805163a9059cbb60e01b81526001600160a01b03948516600482015291850392909203602482015290519186169163a9059cbb916044808201926020929091908290030181600087803b15801561060957600080fd5b505af115801561061d573d6000803e3d6000fd5b505050506040513d602081101561063357600080fd5b5050600a805460ff19166002179055505050505050505050505050565b6006546001600160a01b031633148061067357506005546001600160a01b031633145b6106ba576040805162461bcd60e51b8152602060048201526013602482015272191bdb89dd081a185d9948185c1c1c9bdd985b606a1b604482015290519081900360640190fd5b600080546006546007546040805163a9059cbb60e01b81526001600160a01b0393841660048201526024810192909252519190921692839263a9059cbb9260448083019360209383900390910190829087803b15801561071957600080fd5b505af115801561072d573d6000803e3d6000fd5b505050506040513d602081101561074357600080fd5b5050600a805460ff19168117905550565b6005546001600160a01b031681565b6004546001600160a01b031681565b60075481565b6006546001600160a01b031681565b6000546001600160a01b031681565b6008548156fea265627a7a7231582039418233d043ca8ac57add285d5a9fe098ec16f6ff1ff14e908f36339440eb3664736f6c63430005110032"
+// Deprecated: Use ArbitrageMetaData.Bin instead.
+var ArbitrageBin = ArbitrageMetaData.Bin
 
 // DeployArbitrage deploys a new Ethereum contract, binding an instance of Arbitrage to it.
 func DeployArbitrage(auth *bind.TransactOpts, backend bind.ContractBackend, token1_ common.Address, token2_ common.Address, amm1_ common.Address, amm2_ common.Address) (common.Address, *types.Transaction, *Arbitrage, error) {
-	parsed, err := abi.JSON(strings.NewReader(ArbitrageABI))
+	parsed, err := ArbitrageMetaData.GetAbi()
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
+	if parsed == nil {
+		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
+	}
 
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(ArbitrageBin), backend, token1_, token2_, amm1_, amm2_)
+	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(ArbitrageBin), backend, token1_, token2_, amm1_, amm2_)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -517,7 +560,7 @@ func bindArbitrage(address common.Address, caller bind.ContractCaller, transacto
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Arbitrage *ArbitrageRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_Arbitrage *ArbitrageRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _Arbitrage.Contract.ArbitrageCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -536,7 +579,7 @@ func (_Arbitrage *ArbitrageRaw) Transact(opts *bind.TransactOpts, method string,
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Arbitrage *ArbitrageCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_Arbitrage *ArbitrageCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _Arbitrage.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -553,286 +596,341 @@ func (_Arbitrage *ArbitrageTransactorRaw) Transact(opts *bind.TransactOpts, meth
 
 // Amm1Address is a free data retrieval call binding the contract method 0x472fa96c.
 //
-// Solidity: function amm1Address() constant returns(address)
+// Solidity: function amm1Address() view returns(address)
 func (_Arbitrage *ArbitrageCaller) Amm1Address(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "amm1Address")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "amm1Address")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Amm1Address is a free data retrieval call binding the contract method 0x472fa96c.
 //
-// Solidity: function amm1Address() constant returns(address)
+// Solidity: function amm1Address() view returns(address)
 func (_Arbitrage *ArbitrageSession) Amm1Address() (common.Address, error) {
 	return _Arbitrage.Contract.Amm1Address(&_Arbitrage.CallOpts)
 }
 
 // Amm1Address is a free data retrieval call binding the contract method 0x472fa96c.
 //
-// Solidity: function amm1Address() constant returns(address)
+// Solidity: function amm1Address() view returns(address)
 func (_Arbitrage *ArbitrageCallerSession) Amm1Address() (common.Address, error) {
 	return _Arbitrage.Contract.Amm1Address(&_Arbitrage.CallOpts)
 }
 
 // Amm2Address is a free data retrieval call binding the contract method 0x87700c1d.
 //
-// Solidity: function amm2Address() constant returns(address)
+// Solidity: function amm2Address() view returns(address)
 func (_Arbitrage *ArbitrageCaller) Amm2Address(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "amm2Address")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "amm2Address")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Amm2Address is a free data retrieval call binding the contract method 0x87700c1d.
 //
-// Solidity: function amm2Address() constant returns(address)
+// Solidity: function amm2Address() view returns(address)
 func (_Arbitrage *ArbitrageSession) Amm2Address() (common.Address, error) {
 	return _Arbitrage.Contract.Amm2Address(&_Arbitrage.CallOpts)
 }
 
 // Amm2Address is a free data retrieval call binding the contract method 0x87700c1d.
 //
-// Solidity: function amm2Address() constant returns(address)
+// Solidity: function amm2Address() view returns(address)
 func (_Arbitrage *ArbitrageCallerSession) Amm2Address() (common.Address, error) {
 	return _Arbitrage.Contract.Amm2Address(&_Arbitrage.CallOpts)
 }
 
 // Arbitrageur is a free data retrieval call binding the contract method 0xb3115c5c.
 //
-// Solidity: function arbitrageur() constant returns(address)
+// Solidity: function arbitrageur() view returns(address)
 func (_Arbitrage *ArbitrageCaller) Arbitrageur(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "arbitrageur")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "arbitrageur")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Arbitrageur is a free data retrieval call binding the contract method 0xb3115c5c.
 //
-// Solidity: function arbitrageur() constant returns(address)
+// Solidity: function arbitrageur() view returns(address)
 func (_Arbitrage *ArbitrageSession) Arbitrageur() (common.Address, error) {
 	return _Arbitrage.Contract.Arbitrageur(&_Arbitrage.CallOpts)
 }
 
 // Arbitrageur is a free data retrieval call binding the contract method 0xb3115c5c.
 //
-// Solidity: function arbitrageur() constant returns(address)
+// Solidity: function arbitrageur() view returns(address)
 func (_Arbitrage *ArbitrageCallerSession) Arbitrageur() (common.Address, error) {
 	return _Arbitrage.Contract.Arbitrageur(&_Arbitrage.CallOpts)
 }
 
 // Exchange is a free data retrieval call binding the contract method 0xd2f7265a.
 //
-// Solidity: function exchange() constant returns(address)
+// Solidity: function exchange() view returns(address)
 func (_Arbitrage *ArbitrageCaller) Exchange(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "exchange")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "exchange")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Exchange is a free data retrieval call binding the contract method 0xd2f7265a.
 //
-// Solidity: function exchange() constant returns(address)
+// Solidity: function exchange() view returns(address)
 func (_Arbitrage *ArbitrageSession) Exchange() (common.Address, error) {
 	return _Arbitrage.Contract.Exchange(&_Arbitrage.CallOpts)
 }
 
 // Exchange is a free data retrieval call binding the contract method 0xd2f7265a.
 //
-// Solidity: function exchange() constant returns(address)
+// Solidity: function exchange() view returns(address)
 func (_Arbitrage *ArbitrageCallerSession) Exchange() (common.Address, error) {
 	return _Arbitrage.Contract.Exchange(&_Arbitrage.CallOpts)
 }
 
 // Intrest is a free data retrieval call binding the contract method 0xffbe7402.
 //
-// Solidity: function intrest() constant returns(uint256)
+// Solidity: function intrest() view returns(uint256)
 func (_Arbitrage *ArbitrageCaller) Intrest(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "intrest")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "intrest")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Intrest is a free data retrieval call binding the contract method 0xffbe7402.
 //
-// Solidity: function intrest() constant returns(uint256)
+// Solidity: function intrest() view returns(uint256)
 func (_Arbitrage *ArbitrageSession) Intrest() (*big.Int, error) {
 	return _Arbitrage.Contract.Intrest(&_Arbitrage.CallOpts)
 }
 
 // Intrest is a free data retrieval call binding the contract method 0xffbe7402.
 //
-// Solidity: function intrest() constant returns(uint256)
+// Solidity: function intrest() view returns(uint256)
 func (_Arbitrage *ArbitrageCallerSession) Intrest() (*big.Int, error) {
 	return _Arbitrage.Contract.Intrest(&_Arbitrage.CallOpts)
 }
 
 // Lender is a free data retrieval call binding the contract method 0xbcead63e.
 //
-// Solidity: function lender() constant returns(address)
+// Solidity: function lender() view returns(address)
 func (_Arbitrage *ArbitrageCaller) Lender(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "lender")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "lender")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Lender is a free data retrieval call binding the contract method 0xbcead63e.
 //
-// Solidity: function lender() constant returns(address)
+// Solidity: function lender() view returns(address)
 func (_Arbitrage *ArbitrageSession) Lender() (common.Address, error) {
 	return _Arbitrage.Contract.Lender(&_Arbitrage.CallOpts)
 }
 
 // Lender is a free data retrieval call binding the contract method 0xbcead63e.
 //
-// Solidity: function lender() constant returns(address)
+// Solidity: function lender() view returns(address)
 func (_Arbitrage *ArbitrageCallerSession) Lender() (common.Address, error) {
 	return _Arbitrage.Contract.Lender(&_Arbitrage.CallOpts)
 }
 
 // Loan is a free data retrieval call binding the contract method 0xd285b7b4.
 //
-// Solidity: function loan() constant returns(uint256)
+// Solidity: function loan() view returns(uint256)
 func (_Arbitrage *ArbitrageCaller) Loan(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "loan")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "loan")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Loan is a free data retrieval call binding the contract method 0xd285b7b4.
 //
-// Solidity: function loan() constant returns(uint256)
+// Solidity: function loan() view returns(uint256)
 func (_Arbitrage *ArbitrageSession) Loan() (*big.Int, error) {
 	return _Arbitrage.Contract.Loan(&_Arbitrage.CallOpts)
 }
 
 // Loan is a free data retrieval call binding the contract method 0xd285b7b4.
 //
-// Solidity: function loan() constant returns(uint256)
+// Solidity: function loan() view returns(uint256)
 func (_Arbitrage *ArbitrageCallerSession) Loan() (*big.Int, error) {
 	return _Arbitrage.Contract.Loan(&_Arbitrage.CallOpts)
 }
 
 // LoanHash is a free data retrieval call binding the contract method 0x1e306772.
 //
-// Solidity: function loanHash() constant returns(bytes32)
+// Solidity: function loanHash() view returns(bytes32)
 func (_Arbitrage *ArbitrageCaller) LoanHash(opts *bind.CallOpts) ([32]byte, error) {
-	var (
-		ret0 = new([32]byte)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "loanHash")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "loanHash")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
 }
 
 // LoanHash is a free data retrieval call binding the contract method 0x1e306772.
 //
-// Solidity: function loanHash() constant returns(bytes32)
+// Solidity: function loanHash() view returns(bytes32)
 func (_Arbitrage *ArbitrageSession) LoanHash() ([32]byte, error) {
 	return _Arbitrage.Contract.LoanHash(&_Arbitrage.CallOpts)
 }
 
 // LoanHash is a free data retrieval call binding the contract method 0x1e306772.
 //
-// Solidity: function loanHash() constant returns(bytes32)
+// Solidity: function loanHash() view returns(bytes32)
 func (_Arbitrage *ArbitrageCallerSession) LoanHash() ([32]byte, error) {
 	return _Arbitrage.Contract.LoanHash(&_Arbitrage.CallOpts)
 }
 
 // Status is a free data retrieval call binding the contract method 0x200d2ed2.
 //
-// Solidity: function status() constant returns(uint8)
+// Solidity: function status() view returns(uint8)
 func (_Arbitrage *ArbitrageCaller) Status(opts *bind.CallOpts) (uint8, error) {
-	var (
-		ret0 = new(uint8)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "status")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "status")
+
+	if err != nil {
+		return *new(uint8), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint8)).(*uint8)
+
+	return out0, err
+
 }
 
 // Status is a free data retrieval call binding the contract method 0x200d2ed2.
 //
-// Solidity: function status() constant returns(uint8)
+// Solidity: function status() view returns(uint8)
 func (_Arbitrage *ArbitrageSession) Status() (uint8, error) {
 	return _Arbitrage.Contract.Status(&_Arbitrage.CallOpts)
 }
 
 // Status is a free data retrieval call binding the contract method 0x200d2ed2.
 //
-// Solidity: function status() constant returns(uint8)
+// Solidity: function status() view returns(uint8)
 func (_Arbitrage *ArbitrageCallerSession) Status() (uint8, error) {
 	return _Arbitrage.Contract.Status(&_Arbitrage.CallOpts)
 }
 
 // Token1Address is a free data retrieval call binding the contract method 0xd7cb416f.
 //
-// Solidity: function token1Address() constant returns(address)
+// Solidity: function token1Address() view returns(address)
 func (_Arbitrage *ArbitrageCaller) Token1Address(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "token1Address")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "token1Address")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Token1Address is a free data retrieval call binding the contract method 0xd7cb416f.
 //
-// Solidity: function token1Address() constant returns(address)
+// Solidity: function token1Address() view returns(address)
 func (_Arbitrage *ArbitrageSession) Token1Address() (common.Address, error) {
 	return _Arbitrage.Contract.Token1Address(&_Arbitrage.CallOpts)
 }
 
 // Token1Address is a free data retrieval call binding the contract method 0xd7cb416f.
 //
-// Solidity: function token1Address() constant returns(address)
+// Solidity: function token1Address() view returns(address)
 func (_Arbitrage *ArbitrageCallerSession) Token1Address() (common.Address, error) {
 	return _Arbitrage.Contract.Token1Address(&_Arbitrage.CallOpts)
 }
 
 // Token2Address is a free data retrieval call binding the contract method 0x2456af82.
 //
-// Solidity: function token2Address() constant returns(address)
+// Solidity: function token2Address() view returns(address)
 func (_Arbitrage *ArbitrageCaller) Token2Address(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _Arbitrage.contract.Call(opts, out, "token2Address")
-	return *ret0, err
+	var out []interface{}
+	err := _Arbitrage.contract.Call(opts, &out, "token2Address")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
 }
 
 // Token2Address is a free data retrieval call binding the contract method 0x2456af82.
 //
-// Solidity: function token2Address() constant returns(address)
+// Solidity: function token2Address() view returns(address)
 func (_Arbitrage *ArbitrageSession) Token2Address() (common.Address, error) {
 	return _Arbitrage.Contract.Token2Address(&_Arbitrage.CallOpts)
 }
 
 // Token2Address is a free data retrieval call binding the contract method 0x2456af82.
 //
-// Solidity: function token2Address() constant returns(address)
+// Solidity: function token2Address() view returns(address)
 func (_Arbitrage *ArbitrageCallerSession) Token2Address() (common.Address, error) {
 	return _Arbitrage.Contract.Token2Address(&_Arbitrage.CallOpts)
 }
@@ -900,32 +998,43 @@ func (_Arbitrage *ArbitrageTransactorSession) Setup(lender_ common.Address, arbi
 	return _Arbitrage.Contract.Setup(&_Arbitrage.TransactOpts, lender_, arbitrageur_, exchange_, loan_, intrest_, loanHash_)
 }
 
-// ERC20ABI is the input ABI used to generate the binding from.
-const ERC20ABI = "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"initialSupply\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
-
-var ERC20ParsedABI, _ = abi.JSON(strings.NewReader(ERC20ABI))
-
-// ERC20FuncSigs maps the 4-byte function signature to its string representation.
-var ERC20FuncSigs = map[string]string{
-	"dd62ed3e": "allowance(address,address)",
-	"095ea7b3": "approve(address,uint256)",
-	"70a08231": "balanceOf(address)",
-	"18160ddd": "totalSupply()",
-	"a9059cbb": "transfer(address,uint256)",
-	"23b872dd": "transferFrom(address,address,uint256)",
+// ERC20MetaData contains all meta data concerning the ERC20 contract.
+var ERC20MetaData = &bind.MetaData{
+	ABI: "[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"initialSupply\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	Sigs: map[string]string{
+		"dd62ed3e": "allowance(address,address)",
+		"095ea7b3": "approve(address,uint256)",
+		"70a08231": "balanceOf(address)",
+		"18160ddd": "totalSupply()",
+		"a9059cbb": "transfer(address,uint256)",
+		"23b872dd": "transferFrom(address,address,uint256)",
+	},
+	Bin: "0x608060405234801561001057600080fd5b506040516106fb3803806106fb83398101604081905261002f916100e1565b610039338261003f565b50610120565b6001600160a01b0382166100995760405162461bcd60e51b815260206004820152601f60248201527f45524332303a206d696e7420746f20746865207a65726f206164647265737300604482015260640160405180910390fd5b80600260008282546100ab91906100fa565b90915550506001600160a01b038216600090815260208190526040812080548392906100d89084906100fa565b90915550505050565b6000602082840312156100f357600080fd5b5051919050565b6000821982111561011b57634e487b7160e01b600052601160045260246000fd5b500190565b6105cc8061012f6000396000f3fe608060405234801561001057600080fd5b50600436106100625760003560e01c8063095ea7b31461006757806318160ddd1461008f57806323b872dd146100a157806370a08231146100b4578063a9059cbb146100dd578063dd62ed3e146100f0575b600080fd5b61007a610075366004610496565b610129565b60405190151581526020015b60405180910390f35b6002545b604051908152602001610086565b61007a6100af3660046104c0565b61013f565b6100936100c23660046104fc565b6001600160a01b031660009081526020819052604090205490565b61007a6100eb366004610496565b6101f5565b6100936100fe36600461051e565b6001600160a01b03918216600090815260016020908152604080832093909416825291909152205490565b6000610136338484610202565b50600192915050565b600061014c8484846102f1565b6001600160a01b0384166000908152600160209081526040808320338452909152902054828110156101d65760405162461bcd60e51b815260206004820152602860248201527f45524332303a207472616e7366657220616d6f756e74206578636565647320616044820152676c6c6f77616e636560c01b60648201526084015b60405180910390fd5b6101ea85336101e58685610567565b610202565b506001949350505050565b60006101363384846102f1565b6001600160a01b0383166102645760405162461bcd60e51b8152602060048201526024808201527f45524332303a20617070726f76652066726f6d20746865207a65726f206164646044820152637265737360e01b60648201526084016101cd565b6001600160a01b0382166102c55760405162461bcd60e51b815260206004820152602260248201527f45524332303a20617070726f766520746f20746865207a65726f206164647265604482015261737360f01b60648201526084016101cd565b6001600160a01b0392831660009081526001602090815260408083209490951682529290925291902055565b6001600160a01b0383166103555760405162461bcd60e51b815260206004820152602560248201527f45524332303a207472616e736665722066726f6d20746865207a65726f206164604482015264647265737360d81b60648201526084016101cd565b6001600160a01b0382166103b75760405162461bcd60e51b815260206004820152602360248201527f45524332303a207472616e7366657220746f20746865207a65726f206164647260448201526265737360e81b60648201526084016101cd565b6001600160a01b0383166000908152602081905260409020548181101561042f5760405162461bcd60e51b815260206004820152602660248201527f45524332303a207472616e7366657220616d6f756e7420657863656564732062604482015265616c616e636560d01b60648201526084016101cd565b6104398282610567565b6001600160a01b03808616600090815260208190526040808220939093559085168152908120805484929061046f90849061057e565b909155505050505050565b80356001600160a01b038116811461049157600080fd5b919050565b600080604083850312156104a957600080fd5b6104b28361047a565b946020939093013593505050565b6000806000606084860312156104d557600080fd5b6104de8461047a565b92506104ec6020850161047a565b9150604084013590509250925092565b60006020828403121561050e57600080fd5b6105178261047a565b9392505050565b6000806040838503121561053157600080fd5b61053a8361047a565b91506105486020840161047a565b90509250929050565b634e487b7160e01b600052601160045260246000fd5b60008282101561057957610579610551565b500390565b6000821982111561059157610591610551565b50019056fea2646970667358221220167eedd3d3d0b737f6f7e88bb85ddd4e3d312531186d7c2154f8c4e95e3eb20b64736f6c634300080b0033",
 }
 
+// ERC20ABI is the input ABI used to generate the binding from.
+// Deprecated: Use ERC20MetaData.ABI instead.
+var ERC20ABI = ERC20MetaData.ABI
+
+// Deprecated: Use ERC20MetaData.Sigs instead.
+// ERC20FuncSigs maps the 4-byte function signature to its string representation.
+var ERC20FuncSigs = ERC20MetaData.Sigs
+
 // ERC20Bin is the compiled bytecode used for deploying new contracts.
-var ERC20Bin = "0x608060405234801561001057600080fd5b5060405161062c38038061062c8339818101604052602081101561003357600080fd5b505161004833826001600160e01b0361004e16565b506100d3565b6001600160a01b0382166100a9576040805162461bcd60e51b815260206004820152601f60248201527f45524332303a206d696e7420746f20746865207a65726f206164647265737300604482015290519081900360640190fd5b60028054820190556001600160a01b03909116600090815260208190526040902080549091019055565b61054a806100e26000396000f3fe608060405234801561001057600080fd5b50600436106100625760003560e01c8063095ea7b31461006757806318160ddd146100a757806323b872dd146100c157806370a08231146100f7578063a9059cbb1461011d578063dd62ed3e14610149575b600080fd5b6100936004803603604081101561007d57600080fd5b506001600160a01b038135169060200135610177565b604080519115158252519081900360200190f35b6100af61018d565b60408051918252519081900360200190f35b610093600480360360608110156100d757600080fd5b506001600160a01b03813581169160208101359091169060400135610193565b6100af6004803603602081101561010d57600080fd5b50356001600160a01b031661021b565b6100936004803603604081101561013357600080fd5b506001600160a01b038135169060200135610236565b6100af6004803603604081101561015f57600080fd5b506001600160a01b0381358116916020013516610243565b600061018433848461026e565b50600192915050565b60025490565b60006101a0848484610324565b6001600160a01b0384166000908152600160209081526040808320338452909152902054828110156102035760405162461bcd60e51b81526004018080602001828103825260288152602001806104a56028913960400191505060405180910390fd5b610210853385840361026e565b506001949350505050565b6001600160a01b031660009081526020819052604090205490565b6000610184338484610324565b6001600160a01b03918216600090815260016020908152604080832093909416825291909152205490565b6001600160a01b0383166102b35760405162461bcd60e51b81526004018080602001828103825260248152602001806104f26024913960400191505060405180910390fd5b6001600160a01b0382166102f85760405162461bcd60e51b815260040180806020018281038252602281526020018061045d6022913960400191505060405180910390fd5b6001600160a01b0392831660009081526001602090815260408083209490951682529290925291902055565b6001600160a01b0383166103695760405162461bcd60e51b81526004018080602001828103825260258152602001806104cd6025913960400191505060405180910390fd5b6001600160a01b0382166103ae5760405162461bcd60e51b815260040180806020018281038252602381526020018061043a6023913960400191505060405180910390fd5b6001600160a01b038316600090815260208190526040902054818110156104065760405162461bcd60e51b815260040180806020018281038252602681526020018061047f6026913960400191505060405180910390fd5b6001600160a01b03938416600090815260208190526040808220928490039092559290931682529190208054909101905556fe45524332303a207472616e7366657220746f20746865207a65726f206164647265737345524332303a20617070726f766520746f20746865207a65726f206164647265737345524332303a207472616e7366657220616d6f756e7420657863656564732062616c616e636545524332303a207472616e7366657220616d6f756e74206578636565647320616c6c6f77616e636545524332303a207472616e736665722066726f6d20746865207a65726f206164647265737345524332303a20617070726f76652066726f6d20746865207a65726f2061646472657373a265627a7a723158208f4e226829fbd2c03e49a7876267ca4c067041b0cd2c445822bac47278be2e0a64736f6c63430005110032"
+// Deprecated: Use ERC20MetaData.Bin instead.
+var ERC20Bin = ERC20MetaData.Bin
 
 // DeployERC20 deploys a new Ethereum contract, binding an instance of ERC20 to it.
 func DeployERC20(auth *bind.TransactOpts, backend bind.ContractBackend, initialSupply *big.Int) (common.Address, *types.Transaction, *ERC20, error) {
-	parsed, err := abi.JSON(strings.NewReader(ERC20ABI))
+	parsed, err := ERC20MetaData.GetAbi()
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
+	if parsed == nil {
+		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
+	}
 
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(ERC20Bin), backend, initialSupply)
+	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(ERC20Bin), backend, initialSupply)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -1040,7 +1149,7 @@ func bindERC20(address common.Address, caller bind.ContractCaller, transactor bi
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_ERC20 *ERC20Raw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_ERC20 *ERC20Raw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _ERC20.Contract.ERC20Caller.contract.Call(opts, result, method, params...)
 }
 
@@ -1059,7 +1168,7 @@ func (_ERC20 *ERC20Raw) Transact(opts *bind.TransactOpts, method string, params 
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_ERC20 *ERC20CallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_ERC20 *ERC20CallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _ERC20.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -1076,78 +1185,93 @@ func (_ERC20 *ERC20TransactorRaw) Transact(opts *bind.TransactOpts, method strin
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(address owner, address spender) constant returns(uint256)
+// Solidity: function allowance(address owner, address spender) view returns(uint256)
 func (_ERC20 *ERC20Caller) Allowance(opts *bind.CallOpts, owner common.Address, spender common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ERC20.contract.Call(opts, out, "allowance", owner, spender)
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20.contract.Call(opts, &out, "allowance", owner, spender)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(address owner, address spender) constant returns(uint256)
+// Solidity: function allowance(address owner, address spender) view returns(uint256)
 func (_ERC20 *ERC20Session) Allowance(owner common.Address, spender common.Address) (*big.Int, error) {
 	return _ERC20.Contract.Allowance(&_ERC20.CallOpts, owner, spender)
 }
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(address owner, address spender) constant returns(uint256)
+// Solidity: function allowance(address owner, address spender) view returns(uint256)
 func (_ERC20 *ERC20CallerSession) Allowance(owner common.Address, spender common.Address) (*big.Int, error) {
 	return _ERC20.Contract.Allowance(&_ERC20.CallOpts, owner, spender)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(address account) constant returns(uint256)
+// Solidity: function balanceOf(address account) view returns(uint256)
 func (_ERC20 *ERC20Caller) BalanceOf(opts *bind.CallOpts, account common.Address) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ERC20.contract.Call(opts, out, "balanceOf", account)
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20.contract.Call(opts, &out, "balanceOf", account)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(address account) constant returns(uint256)
+// Solidity: function balanceOf(address account) view returns(uint256)
 func (_ERC20 *ERC20Session) BalanceOf(account common.Address) (*big.Int, error) {
 	return _ERC20.Contract.BalanceOf(&_ERC20.CallOpts, account)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(address account) constant returns(uint256)
+// Solidity: function balanceOf(address account) view returns(uint256)
 func (_ERC20 *ERC20CallerSession) BalanceOf(account common.Address) (*big.Int, error) {
 	return _ERC20.Contract.BalanceOf(&_ERC20.CallOpts, account)
 }
 
 // TotalSupply is a free data retrieval call binding the contract method 0x18160ddd.
 //
-// Solidity: function totalSupply() constant returns(uint256)
+// Solidity: function totalSupply() view returns(uint256)
 func (_ERC20 *ERC20Caller) TotalSupply(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ERC20.contract.Call(opts, out, "totalSupply")
-	return *ret0, err
+	var out []interface{}
+	err := _ERC20.contract.Call(opts, &out, "totalSupply")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
 // TotalSupply is a free data retrieval call binding the contract method 0x18160ddd.
 //
-// Solidity: function totalSupply() constant returns(uint256)
+// Solidity: function totalSupply() view returns(uint256)
 func (_ERC20 *ERC20Session) TotalSupply() (*big.Int, error) {
 	return _ERC20.Contract.TotalSupply(&_ERC20.CallOpts)
 }
 
 // TotalSupply is a free data retrieval call binding the contract method 0x18160ddd.
 //
-// Solidity: function totalSupply() constant returns(uint256)
+// Solidity: function totalSupply() view returns(uint256)
 func (_ERC20 *ERC20CallerSession) TotalSupply() (*big.Int, error) {
 	return _ERC20.Contract.TotalSupply(&_ERC20.CallOpts)
 }

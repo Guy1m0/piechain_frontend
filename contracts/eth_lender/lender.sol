@@ -1,6 +1,6 @@
-// abigen --sol Lender.sol  --pkg eth_lender --type Lender --out lender_gen.go
+// SPDX-License-Identifier: UNLICENSED
 
-pragma solidity >=0.4.22 <0.6;
+pragma solidity >=0.4.22;
 
 contract Lender {
     address public tokenAddress;
@@ -13,7 +13,7 @@ contract Lender {
 
     uint256 public status;
 
-    constructor(address tokenAddress_) public {
+    constructor(address tokenAddress_) {
         tokenAddress = tokenAddress_;
     }
 
@@ -62,7 +62,7 @@ contract ERC20 {
 
     uint256 private _totalSupply;
 
-    constructor(uint256 initialSupply) public {
+    constructor(uint256 initialSupply) {
         _mint(msg.sender, initialSupply);
     }
 

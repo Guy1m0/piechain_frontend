@@ -1,6 +1,6 @@
-// abigen --sol arbitrage.sol --pkg eth_arbitrage --type Arbitrage --out arbitrage_gen.go
+// SPDX-License-Identifier: UNLICENSED
 
-pragma solidity >=0.4.22 <0.6;
+pragma solidity >=0.4.22;
 
 contract Arbitrage {
     address public token1Address;
@@ -19,7 +19,7 @@ contract Arbitrage {
 
     uint8 public status;
 
-    constructor(address token1_, address token2_, address amm1_, address amm2_) public {
+    constructor(address token1_, address token2_, address amm1_, address amm2_) {
         token1Address = token1_;
         token2Address = token2_;
         amm1Address = amm1_;
@@ -83,7 +83,7 @@ contract AMM {
     address public token1Address;
     address public token2Address;
 
-    constructor(address token1_, address token2_) public {
+    constructor(address token1_, address token2_) {
         token1Address = token1_;
         token2Address = token2_;
     }
@@ -121,7 +121,7 @@ contract ERC20 {
 
     uint256 private _totalSupply;
 
-    constructor(uint256 initialSupply) public {
+    constructor(uint256 initialSupply) {
         _mint(msg.sender, initialSupply);
     }
 

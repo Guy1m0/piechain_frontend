@@ -1,6 +1,6 @@
-// abigen --sol auction.sol --pkg eth_auction --type Auction --out auction_gen.go
+// SPDX-License-Identifier: UNLICENSED
 
-pragma solidity >=0.4.22 <0.6;
+pragma solidity >=0.4.22;
 
 contract Auction {
     // Parameters of the auction. Times are either
@@ -31,8 +31,8 @@ contract Auction {
     /// Create a simple auction with `_biddingTime`
     /// seconds bidding time on behalf of the
     /// beneficiary address `_beneficiary`.
-    constructor() public {
-        beneficiary = tx.origin;
+    constructor() {
+        beneficiary = payable(msg.sender);
     }
 
     /// Bid on the auction with the value sent
@@ -75,7 +75,7 @@ contract Auction {
             // before `send` returns.
             pendingReturns[msg.sender] = 0;
 
-            if (!tx.origin.send(amount)) {
+            if (!payable(msg.sender).send(amount)) {
                 // No need to call throw here, just reset the amount owing
                 pendingReturns[msg.sender] = amount;
                 return false;

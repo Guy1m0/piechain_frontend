@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/Shopify/sarama v1.30.1
-	github.com/ethereum/go-ethereum v1.9.12
+	github.com/ethereum/go-ethereum v1.10.15
 	github.com/hyperledger/fabric-sdk-go v1.0.0
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/labstack/gommon v0.3.1 // indirect
