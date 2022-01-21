@@ -2,6 +2,7 @@ package cclib
 
 import (
 	"context"
+	"math/big"
 	"os"
 	"time"
 
@@ -32,7 +33,7 @@ func NewTransactor(keyfile, password string) (*bind.TransactOpts, error) {
 		return nil, err
 	}
 	defer f.Close()
-	auth, err := bind.NewTransactor(f, password)
+	auth, err := bind.NewTransactorWithChainID(f, password, big.NewInt(15))
 	if err != nil {
 		return nil, err
 	}
