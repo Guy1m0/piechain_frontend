@@ -85,7 +85,9 @@ func (cc *SmartContract) EndAuction(
 		return err
 	}
 
-	// TODO: verify eth headers
+	if err := VerifyEthHeaders(args.EthHeaders, auction.BaseEthHeader); err != nil {
+		return fmt.Errorf("invalid eth headers %w", err)
+	}
 
 	if !bytes.Equal(args.ProvableResult.Address.Bytes(), common.FromHex(auction.AuctionAddr)) {
 		return fmt.Errorf("unknown auction address")

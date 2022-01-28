@@ -1,11 +1,6 @@
 package auction_pow
 
-var (
-	SignedAuctionResultEvent = "auction.signed_result"
-	AuctionEndingEvent       = "auction.auction_ending"
+const (
+	TopicOnBindAuction = "on_bind_auction"
+	TopicOnEndAuction  = "on_end_auction"
 )
-
-type SignedAuctionResult struct {
-	AuctionResult
-	Signature []byte
-}

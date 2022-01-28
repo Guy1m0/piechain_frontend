@@ -80,8 +80,9 @@ func (cc *AssetClient) StartAuction(args StartAuctionArgs) ([]byte, error) {
 	return cc.contract.SubmitTransaction("StartAuction", string(b))
 }
 
-func (cc *AssetClient) EndAuction(assetID string) ([]byte, error) {
-	return cc.contract.SubmitTransaction("EndAuction", assetID)
+func (cc *AssetClient) EndAuction(args EndAuctionArgs) ([]byte, error) {
+	b, _ := json.Marshal(args)
+	return cc.contract.SubmitTransaction("EndAuction", string(b))
 }
 
 func (cc *AssetClient) GetAsset(assetID string) (*Asset, error) {

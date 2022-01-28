@@ -1,7 +1,8 @@
 package auction_pow
 
 import (
-	"golang.org/x/crypto/sha3"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient/gethclient"
 )
 
 type Asset struct {
@@ -11,36 +12,29 @@ type Asset struct {
 }
 
 type Auction struct {
-	ID         int
-	AssetID    string
-	EthAddr    string
-	QuorumAddr string
+	ID      int
+	AssetID string
+	Status  string
 
-	Status string
+	BaseEthHeader *types.Header
+	AuctionAddr   string
 
-	HighestBid         int
-	HighestBidder      string
-	HighestBidPlatform string
+	HighestBid    int
+	HighestBidder string
+
+	ProvableResult *gethclient.AccountResult
+	EthHeaders     []*types.Header
 }
 
 type StartAuctionArgs struct {
-	AssetID    string
-	EthAddr    string
-	QuorumAddr string
-	Signature  string
+	AssetID     string
+	AuctionAddr string
+	EthHeader   *types.Header
 }
 
-func (this *StartAuctionArgs) Hash() []byte {
-	h := sha3.New256()
-	h.Write([]byte(this.AssetID))
-	h.Write([]byte(this.EthAddr))
-	h.Write([]byte(this.QuorumAddr))
-	return h.Sum(nil)
-}
+type EndAuctionArgs struct {
+	AuctionID int
 
-type AuctionResult struct {
-	HostAuctionID int
-	AuctionAddr   string
-	HighestBid    int
-	HighestBidder string
+	ProvableResult *gethclient.AccountResult
+	EthHeaders     []*types.Header
 }
