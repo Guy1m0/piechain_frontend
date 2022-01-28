@@ -99,6 +99,19 @@ func verifyAuctionProof() {
 	check(err)
 	fmt.Println("verify proof", ok)
 
+	baseNumber := big.NewInt(0).Sub(blockHeader.Number, big.NewInt(5))
+	headers := make([]*types.Header, 0)
+	for i := int64(0); i < 5; i++ {
+		h, err := ethClient.HeaderByNumber(
+			context.Background(), big.NewInt(0).Add(baseNumber, big.NewInt(i)),
+		)
+		check(err)
+		headers = append(headers, h)
+	}
+	err = VerifyEthHeaders(headers[1:], headers[0])
+	check(err)
+	fmt.Printf("valid headers\n")
+
 	// ok, err := VerifyAccountProof(result)
 	// check(err)
 	// fmt.Printf("account proof valid: %t\n", ok)
