@@ -47,6 +47,7 @@ func getEndAuctionResults(auction *auction_pow.Auction) *auction_pow.EndAuctionA
 	check(err)
 
 	var result auction_pow.EndAuctionArgs
+	result.AuctionID = auction.ID
 	result.ProvableResult, err = GetProof(
 		common.HexToAddress(auction.AuctionAddr), []string{"0x1", "0x2"}, lastBlock.Number,
 	)
