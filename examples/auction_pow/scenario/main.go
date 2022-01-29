@@ -35,13 +35,11 @@ func main() {
 	fmt.Println("[fabric] Adding asset")
 	asset = addAsset("asset1")
 
-	fmt.Println("Starting auction")
 	fmt.Println("[ethereum] Deploying auction")
 	ethAddr := deployCrossChainAuction(ethClient)
 
 	fmt.Println("[fabric] Creating auction")
 	myAuction = startAuction(asset.ID, ethAddr)
-	fmt.Println(myAuction)
 
 	fmt.Println("[ethereum] Bidding auction")
 	bidAuction(ethClient, myAuction.AuctionAddr, "../../keys/key1", 500)
@@ -88,7 +86,7 @@ func startAuction(assetID, auctionAddr string) *auction_pow.Auction {
 
 func endAuction(addrHex string, client *ethclient.Client) {
 	addr := common.HexToAddress(addrHex)
-	auctionSession := newAuctionSession(addr, client, "keys/key0")
+	auctionSession := newAuctionSession(addr, client, "../../keys/key0")
 	tx, err := auctionSession.EndAuction()
 	check(err)
 	success, err := cclib.WaitTx(client, tx.Hash())
