@@ -43,17 +43,18 @@ func (cc *SmartContract) StartAuction(
 		return err
 	}
 	if asset.PendingAuctionID > 0 {
-		return fmt.Errorf("pending auction on asset")
+		return fmt.Errorf("an auction is already pending for asset")
 	}
 
 	lastID, err := cc.GetLastAuctionID(ctx)
 	if err != nil {
 		return err
 	}
+	lastID += 1
 	auction := Auction{
-		ID:            lastID + 1,
+		ID:            lastID,
 		AssetID:       args.AssetID,
-		AuctionAddr:   args.AssetID,
+		AuctionAddr:   args.AuctionAddr,
 		BaseEthHeader: args.EthHeader,
 		Status:        "Started",
 	}
@@ -61,7 +62,7 @@ func (cc *SmartContract) StartAuction(
 	if err != nil {
 		return err
 	}
-	err = cc.setLastAuctionID(ctx, auction.ID)
+	err = cc.setLastAuctionID(ctx, lastID)
 	if err != nil {
 		return err
 	}

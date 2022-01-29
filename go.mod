@@ -12,9 +12,8 @@ require (
 	github.com/ethereum/go-ethereum v1.10.15
 	github.com/frankban/quicktest v1.13.0 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08 // indirect
-	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/hyperledger/fabric-sdk-go v1.0.0
+	github.com/hyperledger/fabric-sdk-go v1.0.1-0.20220124135247-4f34271d9b0f
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/labstack/gommon v0.3.1 // indirect
@@ -23,6 +22,7 @@ require (
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/status-im/keycard-go v0.0.0-20190424133014-d95853db0f48 // indirect
 	github.com/tyler-smith/go-bip39 v1.0.2 // indirect
 	github.com/wvanbergen/kafka v0.0.0-20171203153745-e2edea948ddf

@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/aungmawjj/piechain/examples/auction_pow"
@@ -12,6 +14,13 @@ func handleOnEndAuction(payload []byte) {
 	err := json.Unmarshal(payload, &args)
 	check(err)
 
+	e := json.NewEncoder(os.Stdout)
+	e.SetIndent("", "  ")
+	fmt.Println("Received EndAuction arguments")
+	e.Encode(args)
+	fmt.Println()
+
+	fmt.Println("Ending auction on fabric")
 	_, err = assetClient.EndAuction(args)
 	check(err)
 }

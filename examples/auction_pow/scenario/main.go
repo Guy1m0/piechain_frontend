@@ -9,6 +9,7 @@ import (
 	"github.com/aungmawjj/piechain/cclib"
 	"github.com/aungmawjj/piechain/contracts/eth_auction"
 	"github.com/aungmawjj/piechain/examples/auction_pow"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -40,6 +41,7 @@ func main() {
 
 	fmt.Println("[fabric] Creating auction")
 	myAuction = startAuction(asset.ID, ethAddr)
+	fmt.Println(myAuction)
 
 	fmt.Println("[ethereum] Bidding auction")
 	bidAuction(ethClient, myAuction.AuctionAddr, "../../keys/key1", 500)
@@ -111,11 +113,13 @@ func bidAuction(client *ethclient.Client, addrHex, keyfile string, value int64) 
 	}
 	auctionSession.TransactOpts.Value = big.NewInt(0)
 
-	highestBidder, err := auctionSession.HighestBidder()
+	contract, err := eth_auction.NewAuction(addr, client)
+	check(err)
+	highestBidder, err := contract.HighestBidder(&bind.CallOpts{})
 	check(err)
 	fmt.Println("highest bidder:", highestBidder.Hex())
 
-	highestBid, err := auctionSession.HighestBid()
+	highestBid, err := contract.HighestBid(&bind.CallOpts{})
 	check(err)
 	fmt.Println("highest bid:", highestBid)
 }
