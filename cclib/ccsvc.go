@@ -74,24 +74,64 @@ func (svc *CCService) Start() error {
 	config.Offsets.ProcessingTimeout = 10 * time.Second
 
 	topics := svc.topics()
-	log.Printf("Subscribing topics: %s\n", strings.Join(topics, ","))
+	err := svc.publishEmptyEventsToCreateTopics(topics)
+	if err != nil {
+		return err
+	}
+
 	consumer, err := consumergroup.JoinConsumerGroup(
 		svc.serviceID, topics, svc.zkNodes, config,
 	)
 	if err != nil {
 		return err
 	}
+
+	svc.listenAndCommitEmptyEvents(consumer)
+
 	go svc.listenKafkaConsumer(consumer)
+	log.Printf("Subscribed topics: %s\n", strings.Join(topics, ","))
+
 	return nil
+}
+
+func (svc *CCService) publishEmptyEventsToCreateTopics(topics []string) error {
+	for _, t := range topics {
+		// ignore error for the first time
+		svc.kafkaProducer.SendMessage(&sarama.ProducerMessage{Topic: t})
+	}
+	for _, t := range topics {
+		_, _, err := svc.kafkaProducer.SendMessage(&sarama.ProducerMessage{Topic: t})
+		if err != nil {
+			return err
+		}
+	}
+	time.Sleep(3 * time.Second)
+	return nil
+}
+
+func (svc *CCService) listenAndCommitEmptyEvents(consumer *consumergroup.ConsumerGroup) {
+	timer := time.NewTimer(3 * time.Second)
+	defer timer.Stop()
+
+	for {
+		select {
+		case <-timer.C:
+			return
+		case message := <-consumer.Messages():
+			consumer.CommitUpto(message)
+		}
+	}
 }
 
 func (svc *CCService) listenKafkaConsumer(consumer *consumergroup.ConsumerGroup) {
 	for message := range consumer.Messages() {
-		if handler, ok := svc.handlers[message.Topic]; ok {
-			log.Printf("Received event: %s\n", message.Topic)
-			go handler(message.Value)
-			consumer.CommitUpto(message)
+		handler, ok := svc.handlers[message.Topic]
+		if !ok {
+			continue
 		}
+		log.Printf("Received event: %s\n", message.Topic)
+		go handler(message.Value)
+		consumer.CommitUpto(message)
 	}
 }
 

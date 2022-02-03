@@ -23,10 +23,8 @@ func NewChaincode(name string) *Chaincode {
 	}
 
 	ccpPath := filepath.Join(
-		"/",
-		"home",
-		"ubuntu",
-		"fabric2",
+		"../../../",
+		"fabric-samples",
 		"test-network",
 		"organizations",
 		"peerOrganizations",
@@ -39,11 +37,9 @@ func NewChaincode(name string) *Chaincode {
 		log.Fatalf("Failed to create wallet: %v", err)
 	}
 
-	if !wallet.Exists("appUser") {
-		err = populateWallet(wallet)
-		if err != nil {
-			log.Fatalf("Failed to populate wallet contents: %v", err)
-		}
+	err = populateWallet(wallet)
+	if err != nil {
+		log.Fatalf("Failed to populate wallet contents: %v", err)
 	}
 
 	gw, err := gateway.Connect(
@@ -82,10 +78,8 @@ func (cc *Chaincode) EvaluateTransaction(name string, args ...string) ([]byte, e
 func populateWallet(wallet *gateway.Wallet) error {
 	log.Println("============ Populating wallet ============")
 	credPath := filepath.Join(
-		"/",
-		"home",
-		"ubuntu",
-		"fabric2",
+		"../../../",
+		"fabric-samples",
 		"test-network",
 		"organizations",
 		"peerOrganizations",

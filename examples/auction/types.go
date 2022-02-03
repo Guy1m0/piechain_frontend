@@ -32,11 +32,11 @@ type StartAuctionArgs struct {
 	Signature  string
 }
 
-func (this *StartAuctionArgs) Hash() []byte {
+func (args *StartAuctionArgs) Hash() []byte {
 	h := sha3.New256()
-	h.Write([]byte(this.AssetID))
-	h.Write([]byte(this.EthAddr))
-	h.Write([]byte(this.QuorumAddr))
+	h.Write([]byte(args.AssetID))
+	h.Write([]byte(args.EthAddr))
+	h.Write([]byte(args.QuorumAddr))
 	return h.Sum(nil)
 }
 
@@ -48,12 +48,12 @@ type AuctionResult struct {
 	HighestBidder string
 }
 
-func (this *AuctionResult) Hash() []byte {
+func (args *AuctionResult) Hash() []byte {
 	h := sha3.New256()
-	h.Write([]byte(this.AuctionAddr))
-	h.Write([]byte(this.Platform))
-	h.Write([]byte(strconv.Itoa(this.HighestBid)))
-	h.Write([]byte(this.HighestBidder))
+	h.Write([]byte(args.AuctionAddr))
+	h.Write([]byte(args.Platform))
+	h.Write([]byte(strconv.Itoa(args.HighestBid)))
+	h.Write([]byte(args.HighestBidder))
 	return h.Sum(nil)
 }
 

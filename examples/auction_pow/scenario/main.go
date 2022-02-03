@@ -41,12 +41,26 @@ func main() {
 	fmt.Println("[fabric] Creating auction")
 	myAuction = startAuction(asset.ID, ethAddr)
 
+	// fmt.Println("auction address", myAuction.AuctionAddr)
+
 	fmt.Println("[ethereum] Bidding auction")
 	bidAuction(ethClient, myAuction.AuctionAddr, "../../keys/key1", 500)
 	bidAuction(ethClient, myAuction.AuctionAddr, "../../keys/key2", 1000)
 
 	fmt.Println("[ethereum] End auction")
 	endAuction(ethAddr, ethClient)
+
+	time.Sleep(4 * time.Second)
+
+	myAuction, err = assetClient.GetAuction(myAuction.ID)
+	check(err)
+	fmt.Println("[fabric] Auction ended")
+	fmt.Printf("Highest Bidder: %s\n", myAuction.HighestBidder)
+	fmt.Printf("Highest Bid: %d\n", myAuction.HighestBid)
+
+	asset, err = assetClient.GetAsset(asset.ID)
+	check(err)
+	fmt.Printf("Asset owner: %s\n", asset.Owner)
 }
 
 func addAsset(id string) *auction_pow.Asset {

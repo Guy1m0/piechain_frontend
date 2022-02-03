@@ -10,6 +10,13 @@ We develop a general cross-chain communication framework that uses the Kafka pro
 driven approach.
 * End users, who deploy smart contracts and use the CC-SVCs for cross- chain operations.
 
+### Dependencies
+Install Hyperledger Fabric.
+```bash
+cd fabric
+./install.sh
+```
+
 ### Usage
 
 Register event handlers for different services.
