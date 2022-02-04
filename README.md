@@ -4,20 +4,39 @@ We develop a general cross-chain communication framework that uses the Kafka pro
 
 ![alt text](design.png)
 
-### Entities
+## Entities
 * The Kafka network provider, who maintains the Kafka network.
 * Developers, who develops cross-chain services (CC-SVCs) using an event-
 driven approach.
 * End users, who deploy smart contracts and use the CC-SVCs for cross- chain operations.
 
-### Dependencies
+## Setup
+
+### Kafka
+Start Kafka with `docker-compose`.
+```bash
+cd kafka
+docker-compose up -d
+
+# to stop
+docker-compose down
+```
+
+### Fabric
 Install Hyperledger Fabric.
 ```bash
 cd fabric
 ./install.sh
 ```
 
-### Usage
+### Ethereum
+Install go-ethereum and quorum.
+```bash
+cd ethereum
+sudo ./install.sh
+```
+
+## Usage
 
 Register event handlers for different services.
 ```go
@@ -42,59 +61,87 @@ b, _ := json.Marshal(Event1Body{
 ccsvc.Publish("event_1", b)
 ```
 
-### Example Applications
+## Example Applications
 
-#### Flash Loan 
+### Flash Loan 
 [Demo](https://drive.google.com/file/d/1dBHgUrdAmx1COR_3nYZLI5uPjbjk2Sks/view?usp=sharing)
 
 You can run the cross-chain flash loan demo by the following steps.
 
-1. Make sure you have both ethereum and fabric 2 running on the machine.
 
-2. Deploy `contracts/fabric_erc20` with name `token1` on fabric
+1. Run Fabric.
+```bash
+cd fabric-samples/test-network
+./network.sh up createChannel
+```
 
-3. Compile each folder inside `examples/flashloan` using `go build .`
+2. Run ethereum.
+```bash
+cd ethereum/poa
+./remove.sh
+./init.sh
+./start.sh
+```
+
+3. Deploy contracts `fabric_erc20` and `lender` on fabric.
+```bash
+cd fabric-samples/test-network
+./network.sh deployCC -ccn token1 -ccp ../../contracts/fabric_erc20/chaincode/ -ccl go
+./network.sh deployCC -ccn lender -ccp ../../contracts/fabric_lender/chaincode/ -ccl go
+```
 
 4. Run `cclender` and `ccrbit` in two different terminals.
 They are the cross-chain exchange services responsible for relaying messages between two blockchains.
 ```bash
-# from cclender directory
+cd examples/flashloan/cclender
+go build .
 ./cclender
 
-# from ccarbit directory
-./cclender
+cd examples/flashloan/ccabit
+go build .
+./ccabit
 ```
 
 5. Setup `tokens` and `amm` exchanges using `cli`
 ```bash
-# from cli directory
+cd examples/flashloan/ccabit
+go build .
+# Deploy tokens and amm contracts and allocate initial coins.
 ./cli -c setup
 ```
 
-6. Setup flashloan contracts `lender` on `fabric` and `arbitrage` on `ethereum`.
+6. Setup flashloan contract `arbitrage` on `ethereum`.
 ```bash
-# deploy contracts/fabric_lender on fabric
-
-# from arbitrageur directory
+cd examples/flashloan/arbitrageur
+go build .
+# Deploy arbitrage contract on ethereum.
+# Setup both lender and arbitrage contract and generate a signature.
 ./arbitrageur -c setup
-./arbitrageur -c register
+
 ```
 You can check the results in `flash_loan.json` and `commit_vote.json`.
 
-7. Sign Commit Vote by `lender`.
+7. Register the new flashloan to the cc services.
 ```bash
-# from lender directory
+# from arbitrageur directory
+./arbitrageur -c register
+```
+
+8. Sign Commit Vote by `lender`.
+```bash
+cd examples/flashloan/lender
+go build .
 ./lender -c sign
 ```
 
-8. Initialize flash-loan with commit vote by `lender`.
+9. Initialize flash-loan with commit vote by `lender`.
 ```bash
 # from lender directory
 ./lender -c initialize
 ```
 After this step, cross-chain services will detect lender initialization on `fabric` and transfer loan to `arbitrage` contract on `ethereum`.
 
-9. Execute `arbitrage` by `arbitrageur`.
+10. Execute `arbitrage` by `arbitrageur`.
 ```bash
 ./arbitrageur -c execute
 ```
@@ -107,32 +154,116 @@ You can check the token balances on both blockchains using this command.
 ./cli -c display
 ```
 
-#### Auction 
+### Auction with three blockchains
 [Demo](https://drive.google.com/file/d/16f1X0UOpoHOm3NqUJa_K66PA0JtSMzYq/view?usp=sharing)
 
 You can run the auction example by the following steps.
-1. Make sure you have three blockchains ethereum, quorum and fabric running on the machine.
-
-2. Deploy `contracts/fabric_asset` on `fabric`.
-
-3. Run `relayer` and `signer` cross-chain services.
+1. Run Fabric.
 ```bash
-# from examples/auction/relayer
-./relayer 
+cd fabric-samples/test-network
+./network.sh up createChannel
+```
+
+2. Run Ethereum POA.
+```bash
+cd ethereum/poa
+./remove.sh
+./init.sh
+./start.sh
+```
+
+3. Run Quorum Raft.
+```bash
+cd ethereum/raft
+./remove.sh
+./init.sh
+./start.sh
+```
+
+4. Deploy `fabric_asset` on `fabric`.
+```bash
+./network.sh deployCC -ccn asset -ccp ../../contracts/fabric_asset/chaincode -ccl go
+```
+
+3. Run `relayer` crosschain service.
+```bash
+cd examples/auction/relayer
+go build .
+./relayer
+
+4. Run `signer` crosschain services.
 # from examples/auction/signer run signers with different keys for multiple instances (at least 2 for each auction blockchain)
-./signer -p ethereum -id 1 -key ../../keys/key1
-./signer -p quorum -id 1 -key ../../keys/key5
+
+cd examples/auction/signer
+go build .
+
+# on different terminals
+./signer -p ethereum -eth localhost:8545 -key ../../keys/key1 -id 1
+./signer -p ethereum -eth localhost:8545 -key ../../keys/key2 -id 2
+./signer -p quorum -eth localhost:8546 -key ../../keys/key1 -id 1
+./signer -p quorum -eth localhost:8546 -key ../../keys/key2 -id 2
 ```
 
 3. Run the `scenario` script.
 ```bash
-# from examples/auction/scenario
+cd examples/auction/scenario
 go run .
 ```
-This script will do the following steps.
+
+The scenario script will do the following steps.
 1. Add a new asset on the fabric `asset` contract.
 3. Deploy auction contracts on `ethereum` and `quorum`.
 2. Create a new auction for this asset on on fabric.
 3. Bid correspondingly on both `ethereum` and `quorum`.
 4. End auction on `fabric` and print out the winner info and final asset owner on `fabric`.
+
+### Auction with Ethereum POW
+[Demo](https://drive.google.com/file/d/16f1X0UOpoHOm3NqUJa_K66PA0JtSMzYq/view?usp=sharing)
+
+You can run the auction example by the following steps.
+1. Run Fabric.
+```bash
+cd fabric-samples/test-network
+./network.sh up createChannel
+```
+
+2. Run Ethereum POW.
+```bash
+cd ethereum/pow
+./remove.sh
+./init.sh
+./start.sh
+```
+
+3. Deploy `fabric_asset_pow` on `fabric`.
+```bash
+./network.sh deployCC -ccn asset -ccp ../../contracts/fabric_asset_pow/chaincode -ccl go
+```
+
+4. Run `relayer` crosschain service.
+```bash
+cd examples/auction_pow/relayer
+go build .
+./relayer
+
+5. Run `end_listener` crosschain services.
+cd examples/auction_pow/end_listener
+go build .
+./end_listener
+```
+
+6. Run the `scenario` script.
+```bash
+cd examples/auction_pow/scenario
+go run .
+```
+
+The scenario script will do the following steps.
+1. Add a new asset on the fabric `asset` contract.
+3. Deploy auction contract on `ethereum`.
+2. Create a new auction for this asset on on fabric.
+3. Bid on both `ethereum`.
+4. End auction on `ethereum`.
+5. `end_listener` will listen to ethereum auction ending and will publish `on_end_auction` event with POW headers and merkle proof for auction wiiner.
+6. On receiving `on_end_auction` event, `relayer` will end auction on fabric.
 
