@@ -74,9 +74,11 @@ func (svc *CCService) Start(createTopic bool) error {
 	config.Offsets.ProcessingTimeout = 10 * time.Second
 
 	topics := svc.topics()
-	err := svc.publishEmptyEventsToCreateTopics(topics)
-	if err != nil {
-		return err
+	if createTopic {
+		err := svc.publishEmptyEventsToCreateTopics(topics)
+		if err != nil {
+			return err
+		}
 	}
 
 	consumer, err := consumergroup.JoinConsumerGroup(
