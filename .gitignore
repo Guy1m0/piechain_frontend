@@ -3,3 +3,4 @@ examples/auction_pow/relayer/relayer
 fabric-samples
 
 contracts/**/vendor
+**/.DS_Store
