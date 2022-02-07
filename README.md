@@ -253,8 +253,10 @@ cd ethereum/pow
 cd examples/auction_pow/relayer
 go build .
 ./relayer
+```
 
 5. Run `end_listener` crosschain services.
+```bash
 cd examples/auction_pow/end_listener
 go build .
 ./end_listener
