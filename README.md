@@ -192,26 +192,27 @@ cd ethereum/raft
 ./network.sh deployCC -ccn asset -ccp ../../contracts/fabric_asset/chaincode -ccl go
 ```
 
-3. Run `relayer` crosschain service.
+5. Run `relayer` crosschain service.
 ```bash
 cd examples/auction/relayer
 go build .
 ./relayer
+```
 
-4. Run `signer` crosschain services.
-# from examples/auction/signer run signers with different keys for multiple instances (at least 2 for each auction blockchain)
+6. Run `signer` crosschain services.
 
+```bash
 cd examples/auction/signer
 go build .
 
 # on different terminals
-./signer -p ethereum -eth localhost:8545 -key ../../keys/key1 -id 1
+./signer -t -p ethereum -eth localhost:8545 -key ../../keys/key1 -id 1
 ./signer -p ethereum -eth localhost:8545 -key ../../keys/key2 -id 2
 ./signer -p quorum -eth localhost:8546 -key ../../keys/key1 -id 1
 ./signer -p quorum -eth localhost:8546 -key ../../keys/key2 -id 2
 ```
 
-3. Run the `scenario` script.
+7. Run the `scenario` script.
 ```bash
 cd examples/auction/scenario
 go run .

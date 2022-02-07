@@ -29,7 +29,7 @@ func main() {
 	ccsvc, err = cclib.NewEventService(strings.Split(zkNodes, ","), "relayer")
 	check(err)
 	ccsvc.Register(auction.SignedAuctionResultEvent, handleSignedAuctionResult)
-	err = ccsvc.Start()
+	err = ccsvc.Start(true)
 	check(err)
 
 	runAuctionListener()

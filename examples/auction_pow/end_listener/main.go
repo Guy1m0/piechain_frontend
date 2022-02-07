@@ -37,7 +37,7 @@ func main() {
 
 	ccsvc.Register(auction_pow.TopicOnBindAuction, onBindAuction)
 
-	err = ccsvc.Start()
+	err = ccsvc.Start(true)
 	check(err)
 
 	select {}

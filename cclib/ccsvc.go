@@ -68,7 +68,7 @@ func (svc *CCService) setupKafkaProducer() error {
 	return err
 }
 
-func (svc *CCService) Start() error {
+func (svc *CCService) Start(createTopic bool) error {
 	config := consumergroup.NewConfig()
 	config.Offsets.Initial = sarama.OffsetNewest
 	config.Offsets.ProcessingTimeout = 10 * time.Second
@@ -86,7 +86,9 @@ func (svc *CCService) Start() error {
 		return err
 	}
 
-	svc.listenAndCommitEmptyEvents(consumer)
+	if createTopic {
+		svc.listenAndCommitEmptyEvents(consumer)
+	}
 
 	go svc.listenKafkaConsumer(consumer)
 	log.Printf("Subscribed topics: %s\n", strings.Join(topics, ","))

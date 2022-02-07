@@ -37,7 +37,7 @@ func main() {
 	ccsvc, err = cclib.NewEventService(strings.Split(zkNodes, ","), "ccarbit")
 	check(err)
 	ccsvc.Register(flashloan.OnInitializedLending, handleFlashloanInitialized)
-	err = ccsvc.Start()
+	err = ccsvc.Start(true)
 	check(err)
 
 	select {}

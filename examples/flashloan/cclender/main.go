@@ -32,7 +32,7 @@ func main() {
 	check(err)
 	ccsvc.Register(flashloan.OnLoanSuccessful, handleFlashloanSuccessful)
 	ccsvc.Register(flashloan.OnLoanFail, handleFlashloanFail)
-	err = ccsvc.Start()
+	err = ccsvc.Start(true)
 	check(err)
 
 	e := echo.New()

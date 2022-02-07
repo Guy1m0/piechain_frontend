@@ -24,11 +24,14 @@ var (
 )
 
 func main() {
+	createTopic := false
+
 	flag.StringVar(&zkNodes, "zk", zkNodes, "comma separated zoolkeeper nodes")
 	flag.StringVar(&ethEndpoint, "eth", ethEndpoint, "eth endpoint")
 	flag.StringVar(&platform, "p", platform, "platform")
 	flag.StringVar(&signerID, "id", signerID, "signer id")
 	flag.StringVar(&keyfile, "key", keyfile, "private key file")
+	flag.BoolVar(&createTopic, "t", createTopic, "create kafka topic")
 	flag.Parse()
 
 	var err error
@@ -47,7 +50,7 @@ func main() {
 
 	ccsvc.Register(auction.AuctionEndingEvent, handleAuctionEnding)
 
-	err = ccsvc.Start()
+	err = ccsvc.Start(createTopic)
 	check(err)
 
 	select {}
