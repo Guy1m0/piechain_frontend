@@ -1,0 +1,9 @@
+{
+  "LenderContract": "lender",
+  "ArbitrageContract": "0xB3A92C20cc250A8A8204eD99e0964c9Efc898EEf",
+  "Lender": "0xD0A73Fe9D44184e9F1264ce2097064212E67EbFE",
+  "Arbitrageur": "0xd3CF32A24e4527Cf84EF0c8d571f8a77F6481984",
+  "Exchange": "0xAC5580aD28A3c0e044A52541785bFd34c753D3Bf",
+  "Loan": 10000,
+  "Intrest": 100
+}

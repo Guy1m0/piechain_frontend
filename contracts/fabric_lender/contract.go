@@ -16,9 +16,9 @@ type Flashloan struct {
 	LenderContract    string
 	ArbitrageContract string
 
-	Lender    string
-	Arbitrage string
-	Exchange  string
+	Lender      string
+	Arbitrageur string
+	Exchange    string
 
 	Loan    int64
 	Intrest int64
@@ -104,7 +104,7 @@ func (sc *SmartContract) Initialize(
 	if err != nil {
 		return err
 	}
-	err = VerifySignature(hash, arbSig, floan.Arbitrage)
+	err = VerifySignature(hash, arbSig, floan.Arbitrageur)
 	if err != nil {
 		return err
 	}

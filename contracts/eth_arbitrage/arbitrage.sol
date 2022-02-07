@@ -19,7 +19,12 @@ contract Arbitrage {
 
     uint8 public status;
 
-    constructor(address token1_, address token2_, address amm1_, address amm2_) {
+    constructor(
+        address token1_,
+        address token2_,
+        address amm1_,
+        address amm2_
+    ) {
         token1Address = token1_;
         token2Address = token2_;
         amm1Address = amm1_;
@@ -27,8 +32,12 @@ contract Arbitrage {
     }
 
     function setup(
-        address lender_, address arbitrageur_, address exchange_,
-        uint256 loan_, uint256 intrest_, bytes32 loanHash_
+        address lender_,
+        address arbitrageur_,
+        address exchange_,
+        uint256 loan_,
+        uint256 intrest_,
+        bytes32 loanHash_
     ) public {
         lender = lender_;
         arbitrageur = arbitrageur_;
@@ -40,8 +49,12 @@ contract Arbitrage {
     }
 
     function execute(
-        uint8 vl, bytes32 rl, bytes32 sl,
-        uint8 va, bytes32 ra, bytes32 sa
+        uint8 vl,
+        bytes32 rl,
+        bytes32 sl,
+        uint8 va,
+        bytes32 ra,
+        bytes32 sa
     ) public {
         address lender_ = ecrecover(loanHash, vl, rl, sl);
         address arbitrageur_ = ecrecover(loanHash, va, ra, sa);
@@ -61,21 +74,23 @@ contract Arbitrage {
         uint256 t1amount = amm2.exchange2to1(t2amount);
 
         require(t1amount > loan + intrest, "not enough profit");
-        
-        token1.transfer(exchange, loan+intrest);
-        token1.transfer(arbitrageur, t1amount-loan-intrest);
+
+        token1.transfer(exchange, loan + intrest);
+        token1.transfer(arbitrageur, t1amount - loan - intrest);
 
         status = 2;
     }
 
     function rollback() public {
-        require(msg.sender == exchange || msg.sender == arbitrageur, "don't have approval");
+        require(
+            msg.sender == exchange || msg.sender == arbitrageur,
+            "don't have approval"
+        );
         ERC20 token1 = ERC20(token1Address);
         token1.transfer(exchange, loan);
         status = 10;
     }
 }
-
 
 contract AMM {
     uint256 public rate1;
@@ -93,7 +108,7 @@ contract AMM {
         rate2 = rate2_;
     }
 
-    function exchange1to2(uint256 amount) public returns(uint256) {
+    function exchange1to2(uint256 amount) public returns (uint256) {
         ERC20 token1 = ERC20(token1Address);
         ERC20 token2 = ERC20(token2Address);
 
@@ -103,7 +118,7 @@ contract AMM {
         return result;
     }
 
-    function exchange2to1(uint256 amount) public returns(uint256){
+    function exchange2to1(uint256 amount) public returns (uint256) {
         ERC20 token1 = ERC20(token1Address);
         ERC20 token2 = ERC20(token2Address);
 
@@ -125,24 +140,28 @@ contract ERC20 {
         _mint(msg.sender, initialSupply);
     }
 
-    function totalSupply() public view  returns (uint256) {
+    function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 
-    function balanceOf(address account) public view  returns (uint256) {
+    function balanceOf(address account) public view returns (uint256) {
         return _balances[account];
     }
 
-    function transfer(address recipient, uint256 amount) public  returns (bool) {
+    function transfer(address recipient, uint256 amount) public returns (bool) {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
 
-    function allowance(address owner, address spender) public view  returns (uint256) {
+    function allowance(address owner, address spender)
+        public
+        view
+        returns (uint256)
+    {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint256 amount) public  returns (bool) {
+    function approve(address spender, uint256 amount) public returns (bool) {
         _approve(msg.sender, spender, amount);
         return true;
     }
@@ -151,11 +170,14 @@ contract ERC20 {
         address sender,
         address recipient,
         uint256 amount
-    ) public  returns (bool) {
+    ) public returns (bool) {
         _transfer(sender, recipient, amount);
 
         uint256 currentAllowance = _allowances[sender][msg.sender];
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        require(
+            currentAllowance >= amount,
+            "ERC20: transfer amount exceeds allowance"
+        );
         _approve(sender, msg.sender, currentAllowance - amount);
 
         return true;
@@ -169,9 +191,11 @@ contract ERC20 {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
-
         uint256 senderBalance = _balances[sender];
-        require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
+        require(
+            senderBalance >= amount,
+            "ERC20: transfer amount exceeds balance"
+        );
         _balances[sender] = senderBalance - amount;
         _balances[recipient] += amount;
     }
@@ -193,5 +217,4 @@ contract ERC20 {
 
         _allowances[owner][spender] = amount;
     }
-
 }

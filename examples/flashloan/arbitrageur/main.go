@@ -61,6 +61,8 @@ func main() {
 		register()
 	case "execute":
 		execute()
+	case "display":
+		display()
 
 	default:
 		fmt.Println("command not found")
@@ -145,6 +147,19 @@ func register() {
 		bytes.NewReader(b),
 	)
 
+}
+
+func display() {
+	var setupInfo flashloan.SetupInfo
+	flashloan.ReadJsonFile(setupInfoFile, &setupInfo)
+
+	var floan flashloan.Flashloan
+	flashloan.ReadJsonFile(flashloanFile, &floan)
+
+	token1, err := eth_arbitrage.NewERC20(setupInfo.Token1Address, ethClient)
+	check(err)
+
+	flashloan.PrintTokenBalance(token1, common.HexToAddress(floan.ArbitrageContract), "token1", "arbitrage contract")
 }
 
 func execute() {

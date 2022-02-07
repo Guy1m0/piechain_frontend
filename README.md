@@ -126,7 +126,7 @@ go build .
 ./arbitrageur -c setup
 
 ```
-You can check the results in `flash_loan.json` and `commit_vote.json`.
+You can check the results in `flash_loan.json` and `commit_vote.json` in the `flashloan` folder.
 
 7. Register the new flashloan to the cc services.
 ```bash

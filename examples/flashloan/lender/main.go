@@ -9,6 +9,8 @@ import (
 
 	"github.com/aungmawjj/piechain/cclib"
 	"github.com/aungmawjj/piechain/examples/flashloan"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
@@ -36,6 +38,8 @@ func main() {
 	switch *command {
 	case "sign":
 		sign()
+	case "verify":
+		verify()
 	case "initialize":
 		initialize()
 
@@ -84,6 +88,44 @@ func initialize() {
 	}
 	fabricToken := flashloan.NewChaincode(setupInfo.FabricTokenName)
 	flashloan.PrintFabricBalance(fabricToken, lenderS.Address().Hex(), "lender")
+}
+
+func verify() {
+
+	var floan flashloan.Flashloan
+	flashloan.ReadJsonFile(flashloanFile, &floan)
+
+	var commitVote flashloan.CommitVote
+	flashloan.ReadJsonFile(commitVoteFile, &commitVote)
+
+	err := verifySignature(commitVote.LoanHash, commitVote.LenderSig, floan.Lender)
+	check(err)
+
+	err = verifySignature(commitVote.LoanHash, commitVote.ArbitrageSig, floan.Arbitrageur)
+	check(err)
+
+	fmt.Println("Comit vote is valid")
+}
+
+func verifySignature(hash_, signature_, address_ string) error {
+	hash, err := hex.DecodeString(hash_)
+	if err != nil {
+		return nil
+	}
+	signature, err := hex.DecodeString(signature_)
+	if err != nil {
+		return nil
+	}
+	address := common.HexToAddress(address_)
+	pubkey, err := crypto.SigToPub(hash, signature)
+	if err != nil {
+		return err
+	}
+	recover := crypto.PubkeyToAddress(*pubkey)
+	if address.Hex() != recover.Hex() {
+		return fmt.Errorf("invalid signer address")
+	}
+	return nil
 }
 
 func check(err error) {

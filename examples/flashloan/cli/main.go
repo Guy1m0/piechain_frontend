@@ -169,7 +169,14 @@ func display() {
 	flashloan.PrintTokenBalance(token1, arbT.From, "eth token1", "arbitrageur")
 	flashloan.PrintTokenBalance(token2, arbT.From, "eth token2", "arbitrageur")
 
-	fmt.Println("Fabric setup")
+	amm1, err := eth_arbitrage.NewAMM(setupInfo.Amm1Address, ethClient)
+	check(err)
+	amm2, err := eth_arbitrage.NewAMM(setupInfo.Amm2Address, ethClient)
+	check(err)
+
+	flashloan.PrintAMMRate(amm1, "amm1")
+	flashloan.PrintAMMRate(amm2, "amm2")
+
 	fabricToken := flashloan.NewChaincode(fabricTokenName)
 
 	flashloan.PrintFabricBalance(fabricToken, excT.From.Hex(), "exchange")

@@ -4,3 +4,9 @@ fabric-samples
 
 contracts/**/vendor
 **/.DS_Store
+**/wallet
+examples/flashloan/ccarbit/ccarbit
+examples/flashloan/cclender/cclender
+examples/flashloan/arbitrageur/arbitrageur
+examples/flashloan/cli/cli
+examples/flashloan/lender/lender

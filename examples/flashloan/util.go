@@ -38,6 +38,18 @@ func TransferToken(client *ethclient.Client, token *eth_arbitrage.ERC20, auth *b
 	WaitTx(client, tx, "transfer token")
 }
 
+func PrintAMMRate(amm *eth_arbitrage.AMM, ammName string) {
+	r1B, err := amm.Rate1(&bind.CallOpts{})
+	check(err)
+	r2B, err := amm.Rate2(&bind.CallOpts{})
+	check(err)
+	fmt.Printf("%s rate token1 -> token2 : %s -> %s\n",
+		ammName,
+		r1B.String(),
+		r2B.String(),
+	)
+}
+
 func PrintTokenBalance(token *eth_arbitrage.ERC20, address common.Address, tokenName, accountName string) {
 	valueB, err := token.BalanceOf(&bind.CallOpts{}, address)
 	check(err)
