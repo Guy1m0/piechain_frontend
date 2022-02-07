@@ -18,7 +18,7 @@ Start Kafka with `docker-compose`.
 cd kafka
 docker-compose up -d
 
-# to stop
+# to stop after experiments
 docker-compose down
 ```
 
@@ -73,6 +73,9 @@ You can run the cross-chain flash loan demo by the following steps.
 ```bash
 cd fabric-samples/test-network
 ./network.sh up createChannel
+
+# to stop fabric after experiment
+./network.sh down
 ```
 
 2. Run ethereum.
@@ -81,7 +84,11 @@ cd ethereum/poa
 ./remove.sh
 ./init.sh
 ./start.sh
+
+# to stop ethereum after experiment
+./stop.sh
 ```
+NOTE: Check `log.txt` file to ensure that ethereum is running.
 
 3. Deploy contracts `fabric_erc20` and `lender` on fabric.
 ```bash
@@ -90,21 +97,21 @@ cd fabric-samples/test-network
 ./network.sh deployCC -ccn lender -ccp ../../contracts/fabric_lender/chaincode/ -ccl go
 ```
 
-4. Run `cclender` and `ccrbit` in two different terminals.
+4. Run `cclender` and `ccarbit` in two different terminals.
 They are the cross-chain exchange services responsible for relaying messages between two blockchains.
 ```bash
 cd examples/flashloan/cclender
 go build .
 ./cclender
 
-cd examples/flashloan/ccabit
+cd examples/flashloan/ccarbit
 go build .
-./ccabit
+./ccarbit
 ```
 
 5. Setup `tokens` and `amm` exchanges using `cli`
 ```bash
-cd examples/flashloan/ccabit
+cd examples/flashloan/cli
 go build .
 # Deploy tokens and amm contracts and allocate initial coins.
 ./cli -c setup
