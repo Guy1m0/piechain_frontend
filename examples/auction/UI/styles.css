@@ -1,0 +1,120 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+  }
+  
+  header {
+    background-color: #e0e0e0;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  header h1 {
+    color: #333;
+  }
+  
+  main {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .reset-btn,
+  .create-auction-btn,
+  .add-auction-btn,
+  .view-btn {
+    background-color: #4CAF50;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  
+  .reset-btn:hover,
+  .create-auction-btn:hover,
+  .add-auction-btn:hover,
+  .view-btn:hover {
+    background-color: #2E7D32;
+  }
+  
+  .dropdown-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 10px;
+  }
+  
+  .dropdown {
+    padding: 5px 10px;
+    margin-right: 10px;
+    background-color: #FFFFFF;
+    color: #333;
+    border: 1px solid #CCCCCC;
+  }
+  
+  .address-input {
+    padding: 5px 10px;
+    flex-grow: 1;
+    background-color: #FFFFFF;
+    color: #333;
+    border: 1px solid #CCCCCC;
+  }
+  
+  .auction-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* styles.css (partial) */
+  .auction-item[data-active="true"] {
+    background-color: rgba(0, 150, 0, 0.1);
+  }
+
+  .auction-item[data-active="false"] {
+    background-color: rgba(150, 0, 0, 0.1);
+  }
+
+  
+  .auction-item {
+    border: 1px solid #CCCCCC;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  
+  .view-btn {
+    align-self: flex-end;
+    margin-top: 10px;
+  }
+  
+  .auction-info{
+    margin-bottom: 2rem;
+  }
+
+  .bid {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }

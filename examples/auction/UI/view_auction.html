@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Auction</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Detailed Auction View</h1>
+  </header>
+  <main>
+    <a href="index.html"><button class="reset-btn">Back To Dashboard</button></a>
+
+    <div class="dropdown-container">
+      <select class="dropdown">
+        <option>Ethereum (main)</option>
+        <option>Ethereum (test)</option>
+        <option>Fabric</option>
+      </select>
+      <input type="text" class="address-input" placeholder="Account Address">
+      <input type="number" class="bid-value" placeholder="Bid Value">
+      <button class="make-bid-btn" disabled>Make Bid</button>
+    </div>
+
+    <div class="auction-info">
+      <h2>Auction Information</h2>
+      <p><strong>NFT Type:</strong> <span id="nft-type"></span></p>
+      <p><strong>Smart Contract Address:</strong> <span id="smart-contract-address"></span></p>
+    </div>
+
+
+    <div class="auction-info">
+      <h2>Auction Information-Example</h2>
+      <p>Created: 2023-04-01 15:30:00</p>
+      <p>Conclusion Time: 2023-04-05 18:45:00</p>
+      <h3>Other Bids</h3>
+      <div class="other-bids">
+        <div class="other-bids">
+          <div class="bid">
+            <p>Bid #1</p>
+            <p>Bidder: 0x1234abcd...7890</p>
+            <p>Amount: 90 ETH</p>
+            <p>Timestamp: 2023-04-04 10:15:30</p>
+          </div>
+          <div class="bid">
+            <p>Bid #2</p>
+            <p>Bidder: 0x2345bcde...8901</p>
+            <p>Amount: 85 ETH</p>
+            <p>Timestamp: 2023-04-03 14:22:10</p>
+          </div>
+          <div class="bid">
+            <p>Bid #3</p>
+            <p>Bidder: 0x3456cdef...9012</p>
+            <p>Amount: 80 ETH</p>
+            <p>Timestamp: 2023-04-02 18:48:55</p>
+          </div>
+        <!-- other bids -->
+      </div>
+    </div>
+
+  </main>
+  <script>
+    const addressInput = document.querySelector('.address-input');
+    const bidValueInput = document.querySelector('.bid-value');
+    const makeBidBtn = document.querySelector('.make-bid-btn');
+  
+    function checkInputFields() {
+      if (addressInput.value && bidValueInput.value) {
+        makeBidBtn.disabled = false;
+      } else {
+        makeBidBtn.disabled = true;
+      }
+    }
+  
+    addressInput.addEventListener('input', checkInputFields);
+    bidValueInput.addEventListener('input', checkInputFields);
+  </script>
+</body>
+</html>
+
+
+

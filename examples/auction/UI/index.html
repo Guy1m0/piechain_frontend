@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auction Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Auction Dashboard</h1>
+  </header>
+  <main>
+    <button class="reset-btn">Reset</button>
+    <a href="create_auction.html"><button class="create-auction-btn">Create New Auction</button></a>
+    <div class="dropdown-container">
+      <select class="dropdown">
+        <option>Ethereum (main)</option>
+        <option>Ethereum (test)</option>
+        <option>Fabric</option>
+      </select>
+      <input type="text" class="address-input" placeholder="Enter blockchain address">
+    </div>
+    <button class="add-auction-btn">Add Existing Auction</button>
+    <div class="auction-list">
+      <!-- Example Auctions -->
+      <div class="auction-item" data-active="true">
+        <span>Auction #1</span>
+        <span>Number of Bids: 5</span>
+        <span>Top Bid: 100 ETH</span>
+        <p>Active: true</p>
+        <a href="view_auction.html"><button class="view-btn">View</button></a>
+      </div>
+      <div class="auction-item" data-active="false">
+        <p>Auction #2</p>
+        <p>Number of bids: 3</p>
+        <p>Top bid: $300</p>
+        <p>Active: fale</p>
+        <button class="view-btn">View</button>
+      </div>
+      <div class="auction-item" data-active="false">
+        <p>Auction #3</p>
+        <p>Number of bids: 8</p>
+        <p>Top bid: $800</p>
+        <button class="view-btn">View</button>
+      </div>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
+
