@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Auction Dashboard</h1>
+    </header>
+    <div class="container">
+        <h1>Auction Dashboard</h1>
+        <button onclick="resetAuctions()" class="reset-button">Reset</button>
+        <button onclick="location.href='create_auction.html'" class="create-button">Create New Auction</button>
+
+        <div class="dropdown-container">
+            <label for="blockchain-type">Blockchain:</label>
+            <select id="blockchain-type">
+                <option>Ethereum (main)</option>
+                <option>Ethereum (test)</option>
+                <option>Fabric</option>
+            </select>
+        </div>
+
+        <div class="input-container">
+            <label for="blockchain-address">Blockchain Address:</label>
+            <input type="text" id="blockchain-address" required>
+        </div>
+
+        <button onclick="addExistingAuction()" class="add-existing-button">Add Existing Auction</button>
+
+        <div id="auction-list" class="auction-list"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

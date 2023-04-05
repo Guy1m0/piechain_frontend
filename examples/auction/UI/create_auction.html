@@ -1,53 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Auction</title>
     <link rel="stylesheet" href="styles.css">
-  </head>
+</head>
 <body>
-  <header>
-    <h1>New Auction</h1>
-  </header>
+    <div class="container">
+        <h1>Create New Auction</h1>
+        <button onclick="location.href='index.html'" class="back-button">Back to Dashboard</button>
 
-  <main>
-    <a href="index.html"><button class="reset-btn">Back To Dashboard</button></a>
-    <h3>NFT Details</h3>
-    <div class="dropdown-container">
-        
-        <label for="nft-type">NFT Type:</label>
-        <select id="nft-type">
-            <option value="type1">Ethereum</option>
-            <option value="type2">Fabric</option>
-        </select>
-    </div>
-        
-    <div>
-        <label for="conclusion-time">Conclusion Time:</label>
-        <input type="datetime-local" id="conclusion-time">
+        <form onsubmit="event.preventDefault(); createAuction();">
+            <h3>Auction Name</h3>
+            <input type="text" id="nft-type" required>
+
+            <h3>Smart Contract Address</h3>
+            <input type="text" id="smart-contract-address" required>
+
+            <h3>Conclusion Time</h3>
+            <input type="datetime-local" id="conclusion-time" required>
+
+            <h3>Auction Description</h3>
+            <textarea id="auction-description" rows="4" cols="50" required></textarea>
+
+            <h3>Supported Blockchain</h3>
+            <select id="blockchain-type" required>
+                <option value="ethereum">Ethereum</option>
+                <option value="hyperledger-fabric">Hyperledger Fabric</option>
+            </select>
+
+            <button type="submit" class="submit-button">Create Auction</button>
+        </form>
     </div>
 
-    <h3>Auction Description</h3>
-    <div class="form-section">
-        <textarea id="auction-description" rows="4" cols="50" placeholder="Enter the NFT description here"></textarea>
-    </div>
-    
-    <div class="form-section">
-        <h3>Supported Blockchains</h3>
-        <input type="checkbox" id="ethereum" name="blockchain" value="ethereum">
-        <label for="ethereum">Ethereum</label>
-        <br>
-        <input type="checkbox" id="fabric" name="blockchain" value="fabric">
-        <label for="fabric">Hyperledger Fabric</label>
-    </div>
-    
-    <div class="form-section">
-        <button class="create-auction-btn" id="create-auction-btn">Create Auction</button>
-    </div>
-      
-  </main>
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-

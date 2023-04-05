@@ -11,17 +11,21 @@
     <h1>Auction Dashboard</h1>
   </header>
   <main>
-    <button class="reset-btn">Reset</button>
-    <a href="create_auction.html"><button class="create-auction-btn">Create New Auction</button></a>
+    <button onclick="resetAuctions()" class="reset-btn">Reset</button>
+    <button onclick="location.href='create_auction.html'" class="create-auction-btn">Create New Auction</button></a>
+
     <div class="dropdown-container">
-      <select class="dropdown">
-        <option>Ethereum (main)</option>
-        <option>Ethereum (test)</option>
-        <option>Fabric</option>
+      <!-- <label for="blockchain-type">Blockchain:</label> -->
+      <select id="blockchain-type">
+          <option>Ethereum</option>
+          <option>Fabric</option>
       </select>
-      <input type="text" class="address-input" placeholder="Enter blockchain address">
+      <!-- <label for="blockchain-address">Blockchain Address:</label> -->
+      <input type="text" id="blockchain-address" class="address-input" placeholder="Enter blockchain address">
     </div>
+
     <button class="add-auction-btn">Add Existing Auction</button>
+
     <div class="auction-list">
       <!-- Example Auctions -->
       <div class="auction-item" data-active="true">
@@ -45,6 +49,9 @@
         <button class="view-btn">View</button>
       </div>
     </div>
+
+    <div id="auction-list" class="auction-list"></div>
+
   </main>
   <script src="script.js"></script>
 </body>
