@@ -1,9 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
-  if (window.location.pathname.includes("index.html") || window.location.pathname === "/") {
+  //remove  || window.location.pathname === "/"
+  if (window.location.pathname.includes("index.html")) {
     displayAuctions();
   } else if (window.location.pathname.includes("view_auction.html")) {
     loadAuction();
   }
+  /*
+  if (window.location.pathname.includes("login.html")) {
+    alert("login page");
+    setupLoginPage();
+  }
+  */
 });
 
 document.getElementById("make-bid-form").addEventListener("submit", (event) => {
@@ -21,6 +28,7 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
   }
   
   function createAuction() {
+    window.alert("create Auction");
     const nftName = document.getElementById("name").value;
     const blockType = document.getElementById("blockchain-type").value;
     const nftType = document.getElementById("nft-type").value;
@@ -41,6 +49,7 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
       conclusionTime: new Date(conclusionTime).getTime(),
       description: description,
       supportBlock: supportBlock,
+      topBid: 0,
       bids: [],
     };
   
@@ -72,13 +81,18 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
       amount: amount,
       timestamp: new Date().toISOString().replace('T', ' ').substr(0, 19)
     };
-  
+
+    //localStorage.setItem(auctionId, JSON.stringify(auction));
+    if (auction.topBid < bid.amount){
+      document.getElementById("top-bid").textContent = bid.amount;
+      auctions[index].topBid = bid.amount;
+    }
+
     auctions[index].bids.push(bid);
     localStorage.setItem("auctions", JSON.stringify(auctions));
-    //localStorage.setItem(auctionId, JSON.stringify(auction));
-  
+   
     displayBid(bid);
-    document.getElementById("top-bid").textContent = auction.bids.length > 0 ? amount : "N/A";
+    //document.getElementById("top-bid").textContent = auction.bids.length > 0 ? amount : "N/A";
   }
   
   
@@ -98,7 +112,7 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
           <div class="auction-item">
             <h4>Auction #${auction.id}</h4>
             <p>Number of Bids: ${auction.bids.length}</p>
-            <p>Top Bid: ${auction.bids.length > 0 ? auction.bids[auction.bids.length - 1].value : 'N/A'}</p>
+            <p>Top Bid: ${auction.topBid}</p>
             <p>Active: ${isActive}</p>
             <a href="view_auction.html?id=${auction.id}"><button class="view-btn" id="view-auction-page">View</button></a>
           </div>
@@ -107,6 +121,8 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
     });
 
     auctionsContainer.innerHTML = auctionsHtml;
+
+
   }
   
   function loadAuction() {
@@ -122,28 +138,13 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
       window.location.href = "index.html";
       return;
     }
-    /*
-      const auction = {
-      id: auctions.length + 1,
-      nftName: nftName,
-      blockType: blockType,
-      nftType: nftType,
-      blockAddress: blockAddress,
-      conclusionTime: new Date(conclusionTime).getTime(),
-      description: description,
-      supportBlock: supportBlock,
-      bids: [],
-    }
-    
-    */
-    
     //window.alert(document.getElementById("auction-name"));
     document.getElementById("auction-name").textContent = auction.nftName;
     document.getElementById("auction-id").textContent = auction.id;
     document.getElementById("nft-type").textContent = auction.nftType;
     document.getElementById("blockchain-address").textContent = auction.blockAddress;
     document.getElementById("auction-description").textContent = auction.description;
-    document.getElementById("top-bid").textContent = auction.bids.length > 0 ? auction.bids[auction.bids.length - 1].value : "N/A";
+    document.getElementById("top-bid").textContent = auction.topBid;
 
     document.getElementById("conclusion-time").textContent = new Date(auction.conclusionTime).toLocaleString();
     document.getElementById("active-status").textContent = Date.now() < auction.conclusionTime ? "true" : "false";
@@ -152,17 +153,14 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
       displayBid(bid);
     }
     /*
-    const otherBidsContainer = document.getElementById("other-bids");
-    let otherBidsHtml = '';
-    auction.bids.forEach((bid, index) => {
-      otherBidsHtml += `
-        <div class="bid-item">
-          <p>Bid #${index + 1}: ${bid.value} (Timestamp: ${new Date(bid.timestamp).toLocaleString()})</p>
-        </div>
-      `;
-    });
-    
-    otherBidsContainer.innerHTML = otherBidsHtml;
+    // Check if the user is logged in and their user type
+    const userType = sessionStorage.getItem("userType");
+
+    if (userType === "bidder" && auction.active) {
+      document.getElementById("bid-section").style.display = "block";
+    } else {
+      document.getElementById("bid-section").style.display = "none";
+    }
     */
   }
 
@@ -177,8 +175,10 @@ document.getElementById("make-bid-form").addEventListener("submit", (event) => {
       <p>Timestamp: ${bid.timestamp}</p>
     `;
   
+    
     document.getElementById('bid-list').appendChild(bidElement);
+    //const nftName = document.getElementById("name").value;
+
     
   }
-
-  
+// ---------------------------------------------------
