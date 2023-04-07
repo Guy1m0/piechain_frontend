@@ -28,9 +28,11 @@
   }
   
   .reset-btn,
+  .back-btn,
   .create-auction-btn,
   .add-auction-btn,
-  .view-btn {
+  .view-btn,
+  .submit-btn {
     background-color: #4CAF50;
     color: #FFFFFF;
     border: none;
@@ -41,9 +43,11 @@
   }
   
   .reset-btn:hover,
+  .back-btn:hover,
   .create-auction-btn:hover,
   .add-auction-btn:hover,
-  .view-btn:hover {
+  .view-btn:hover,
+  .submit-btn:hover {
     background-color: #2E7D32;
   }
   
@@ -118,3 +122,20 @@
     padding: 1rem;
     margin-bottom: 1rem;
   }
+
+  .description-container {
+    border: 1px solid #CCCCCC;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 150px; /* Adjust the height as needed */
+    overflow: auto;
+    white-space: pre-wrap;
+  }
+  

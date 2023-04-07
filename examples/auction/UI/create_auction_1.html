@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Auction</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create New Auction</h1>
+        <button onclick="location.href='index.html'" class="back-button">Back to Dashboard</button>
+
+        <form onsubmit="event.preventDefault(); createAuction();">
+            <h3>Auction Name</h3>
+            <input type="text" id="nft-type" required>
+
+            <h3>Smart Contract Address</h3>
+            <input type="text" id="smart-contract-address" required>
+
+            <h3>Conclusion Time</h3>
+            <input type="datetime-local" id="conclusion-time" required>
+
+            <h3>Auction Description</h3>
+            <textarea id="auction-description" rows="4" cols="50" required></textarea>
+
+            <h3>Supported Blockchain</h3>
+            <select id="blockchain-type" required>
+                <option value="ethereum">Ethereum</option>
+                <option value="hyperledger-fabric">Hyperledger Fabric</option>
+            </select>
+
+            <button type="submit" class="submit-button">Create Auction</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

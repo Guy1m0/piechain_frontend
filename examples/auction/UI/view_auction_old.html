@@ -15,8 +15,7 @@
 
     <div class="dropdown-container">
       <select class="dropdown">
-        <option>Ethereum (main)</option>
-        <option>Ethereum (test)</option>
+        <option>Ethereum</option>
         <option>Fabric</option>
       </select>
       <input type="text" class="address-input" placeholder="Account Address">
@@ -24,12 +23,15 @@
       <button class="make-bid-btn" disabled>Make Bid</button>
     </div>
 
-    <div class="auction-info">
-      <h2>Auction Information</h2>
-      <p><strong>NFT Type:</strong> <span id="nft-type"></span></p>
-      <p><strong>Smart Contract Address:</strong> <span id="smart-contract-address"></span></p>
-    </div>
-
+    <h2 id="auction-title"></h2>
+    <button id="back-button">Back to Dashboard</button>
+    <h3>Auction Information</h3>
+    <p>Conclusion: <span id="auction-conclusion"></span></p>
+    <p>Blockchain: <span id="blockchain"></span></p>
+    <p>Contract Address: <span id="contract-address"></span></p>
+    <p>NFT Details: <span id="nft-details"></span></p>
+    <h3>Other Bids</h3>
+    <div id="other-bids"></div>
 
     <div class="auction-info">
       <h2>Auction Information-Example</h2>
@@ -61,22 +63,7 @@
     </div>
 
   </main>
-  <script>
-    const addressInput = document.querySelector('.address-input');
-    const bidValueInput = document.querySelector('.bid-value');
-    const makeBidBtn = document.querySelector('.make-bid-btn');
-  
-    function checkInputFields() {
-      if (addressInput.value && bidValueInput.value) {
-        makeBidBtn.disabled = false;
-      } else {
-        makeBidBtn.disabled = true;
-      }
-    }
-  
-    addressInput.addEventListener('input', checkInputFields);
-    bidValueInput.addEventListener('input', checkInputFields);
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
 
