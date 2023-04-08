@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/aungmawjj/piechain/examples/auction_pow"
+	"github.com/Guy1m0/piechain-frontend/examples/auction_pow"
 )
 
 func handleOnEndAuction(payload []byte) {

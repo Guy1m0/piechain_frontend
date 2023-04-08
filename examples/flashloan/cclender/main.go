@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aungmawjj/piechain/cclib"
-	"github.com/aungmawjj/piechain/examples/flashloan"
+	"github.com/Guy1m0/piechain-frontend/cclib"
+	"github.com/Guy1m0/piechain-frontend/examples/flashloan"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

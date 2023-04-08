@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/aungmawjj/piechain/cclib"
-	"github.com/aungmawjj/piechain/contracts/eth_arbitrage"
+	"github.com/Guy1m0/piechain-frontend/cclib"
+	"github.com/Guy1m0/piechain-frontend/contracts/eth_arbitrage"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"

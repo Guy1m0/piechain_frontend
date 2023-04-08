@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/aungmawjj/piechain/contracts/eth_arbitrage"
-	"github.com/aungmawjj/piechain/examples/flashloan"
+	"github.com/Guy1m0/piechain-frontend/contracts/eth_arbitrage"
+	"github.com/Guy1m0/piechain-frontend/examples/flashloan"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 )

@@ -1,4 +1,4 @@
-module github.com/aungmawjj/piechain
+module github.com/Guy1m0/piechain-frontend
 
 go 1.16
 

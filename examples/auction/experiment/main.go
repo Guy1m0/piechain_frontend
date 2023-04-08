@@ -9,8 +9,8 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/aungmawjj/piechain/cclib"
-	"github.com/aungmawjj/piechain/contracts/eth_auction"
+	"github.com/Guy1m0/piechain-frontend/cclib"
+	"github.com/Guy1m0/piechain-frontend/contracts/eth_auction"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"

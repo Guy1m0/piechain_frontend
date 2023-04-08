@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aungmawjj/piechain/examples/flashloan"
+	"github.com/Guy1m0/piechain-frontend/examples/flashloan"
 )
 
 func TestFabricToken() {

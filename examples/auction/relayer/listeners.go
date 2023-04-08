@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/aungmawjj/piechain/examples/auction"
+	"github.com/Guy1m0/piechain-frontend/examples/auction"
 )
 
 func runAuctionListener() {
