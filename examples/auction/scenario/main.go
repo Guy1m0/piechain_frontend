@@ -5,12 +5,25 @@ import (
 	"math/big"
 	"time"
 
+	"encoding/json"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/Guy1m0/piechain-frontend/cclib"
 	"github.com/Guy1m0/piechain-frontend/contracts/eth_auction"
 	"github.com/Guy1m0/piechain-frontend/examples/auction"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
+
+// Define request and response structures
+type APIResponse struct {
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}
 
 type CreateAuctionRequest struct {
 	AssetCC  []byte
@@ -22,21 +35,56 @@ var ethClient *ethclient.Client
 var quorumClient *ethclient.Client
 var assetClient *auction.AssetClient
 
-func main() {
-	var err error
-	ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s:8545", "localhost"))
-	check(err)
+var asset *auction.Asset
+var myAuction *auction.Auction
 
-	quorumClient, err = ethclient.Dial(fmt.Sprintf("http://%s:8546", "localhost"))
-	check(err)
+// Add a function to start the HTTP server
+func startHTTPServer() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
+	})
 
-	assetClient = auction.NewAssetClient()
+	//http.HandleFunc("/api/add-asset", handleAddAsset)
+	http.HandleFunc("/api/start-auction", handleStartAuction)
 
-	var asset *auction.Asset
-	var myAuction *auction.Auction
+	go func() {
+		err := http.ListenAndServe(":6789", nil)
+		if err != nil {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+}
 
-	fmt.Println("[fabric] Adding asset")
-	asset = addAsset("asset1")
+// Add handler functions for each API endpoint
+func handleAddAsset(w http.ResponseWriter, r *http.Request) {
+	//fmt.Println("Receiving addAsset API Call")
+	assetID := r.URL.Query().Get("asset_id")
+	if assetID == "" {
+		http.Error(w, "Missing asset_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	asset := addAsset(assetID)
+	fmt.Println("Adding asset", assetID)
+
+	response := APIResponse{
+		Message: "Asset added",
+		Data:    asset,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func handleStartAuction(w http.ResponseWriter, r *http.Request) {
+	assetID := r.URL.Query().Get("asset_id")
+	if assetID == "" {
+		http.Error(w, "Missing asset_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	asset := addAsset(assetID)
+	fmt.Println("Adding asset", assetID)
 
 	fmt.Println("Starting auction")
 	fmt.Println("[ethereum] Deploying auction")
@@ -48,28 +96,69 @@ func main() {
 	fmt.Println("[fabric] Creating auction")
 	myAuction = startAuction(asset.ID, ethAddr, quorumAddr)
 
-	fmt.Println("[ethereum] Bidding auction")
-	bidAuction(ethClient, myAuction.EthAddr, "../../keys/key1", 500)
+	response := APIResponse{
+		Message: "Auction started",
+		Data:    myAuction,
+	}
 
-	fmt.Println("[quorum] Bidding auction")
-	bidAuction(quorumClient, myAuction.QuorumAddr, "../../keys/key2", 1000)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
 
-	fmt.Println("[fabric] Ending auction")
-	endAuction(myAuction)
+func main() {
+	// Initialize system
+
+	// Start two clients for users to send/sign tx
+	var err error
+	ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s:8545", "localhost"))
+	check(err)
+
+	quorumClient, err = ethclient.Dial(fmt.Sprintf("http://%s:8546", "localhost"))
+	check(err)
+
+	assetClient = auction.NewAssetClient()
+
+	//var asset *auction.Asset
+	//var myAuction *auction.Auction
+
+	fmt.Println("Start to listening")
+	startHTTPServer()
+	//fmt.Println("[fabric] Adding asset")
+
+	// Wait for an interrupt signal to gracefully shut down the server
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
+	//fmt.Println("[fabric] Adding asset")–
+	/*
+		fmt.Println("[fabric] Adding asset")
+		asset = addAsset("asset1")
+
+		fmt.Println("[ethereum] Bidding auction")
+		bidAuction(ethClient, myAuction.EthAddr, "../../keys/key1", 500)
+
+		fmt.Println("[quorum] Bidding auction")
+		bidAuction(quorumClient, myAuction.QuorumAddr, "../../keys/key2", 1000)
+
+		fmt.Println("[fabric] Ending auction")
+		endAuction(myAuction)
+	*/
 }
 
 func addAsset(id string) *auction.Asset {
+	// auth is the admin account to add asset
 	auth, err := cclib.NewTransactor("../../keys/key0", "password")
 	check(err)
 	_, err = assetClient.AddAsset(id, auth.From.Hex())
 	check(err)
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
 	asset, err := assetClient.GetAsset(id)
 	check(err)
-	fmt.Println("Asset added, owner: ", asset.Owner)
+	//fmt.Println("Asset added, owner: ", asset.Owner)
 	return asset
 }
 
+// more like a bridge?
 func startAuction(assetID, ethAddr, quorumAddr string) *auction.Auction {
 	args := auction.StartAuctionArgs{
 		AssetID:    assetID,
