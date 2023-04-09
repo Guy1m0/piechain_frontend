@@ -200,7 +200,11 @@ let bidderAddress = '';
     document.getElementById("top-bid").textContent = auction.topBid;
 
     document.getElementById("conclusion-time").textContent = new Date(auction.conclusionTime).toLocaleString();
-    document.getElementById("active-status").textContent = Date.now() < auction.conclusionTime ? "true" : "false";
+    const isActive = Date.now() < auction.conclusionTime ? "true" : "false";
+    document.getElementById("active-status").textContent = isActive;
+
+    const bidSection = document.getElementById("bid-section");
+    bidSection.style.display = isActive === "true" ? "block" : "none";
     
     for (const bid of auction.bids) {
       displayBid(bid);
@@ -256,11 +260,11 @@ async function addAsset(assetID) {
   }
 }
 
-/*
+
 async function startAuction(assetID) {
   //window.alert("Start Auction?");
   try {
-      const response = await fetch(`http://localhost:8080/api/start-auction?asset_id=${assetID}`);
+      const response = await fetch(`http://localhost:6789/api/start-auction?asset_id=${assetID}`);
       const data = await response.json();
       window.alert("startAuction: "+data.EthAddr);
       return data;
@@ -270,7 +274,8 @@ async function startAuction(assetID) {
       console.error("Error adding asset:", error);
   }
 }
-*/
+
+/*
 async function startAuction(assetID) {
   const TIMEOUT_MS = 10000; // 10 seconds
   const controller = new AbortController();
@@ -299,5 +304,7 @@ async function startAuction(assetID) {
     }
   }
 }
+
+*/
 
 
