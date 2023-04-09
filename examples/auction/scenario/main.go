@@ -3,20 +3,21 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/Guy1m0/piechain-frontend/cclib"
 	"github.com/Guy1m0/piechain-frontend/contracts/eth_auction"
 	"github.com/Guy1m0/piechain-frontend/examples/auction"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/rs/cors"
 )
 
 // Define request and response structures
@@ -40,15 +41,28 @@ var myAuction *auction.Auction
 
 // Add a function to start the HTTP server
 func startHTTPServer() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
 	})
 
-	//http.HandleFunc("/api/add-asset", handleAddAsset)
-	http.HandleFunc("/api/start-auction", handleStartAuction)
+	mux.HandleFunc("/api/add-asset", handleAddAsset)
+	mux.HandleFunc("/api/start-auction", handleStartAuction)
+
+	// Enable CORS
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"*"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(mux)
 
 	go func() {
-		err := http.ListenAndServe(":6789", nil)
+		fmt.Println("Starting server on port 6789")
+		err := http.ListenAndServe(":6789", handler)
 		if err != nil {
 			log.Fatalf("Failed to start server: %v", err)
 		}
@@ -57,23 +71,42 @@ func startHTTPServer() {
 
 // Add handler functions for each API endpoint
 func handleAddAsset(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println("Receiving addAsset API Call")
 	assetID := r.URL.Query().Get("asset_id")
 	if assetID == "" {
 		http.Error(w, "Missing asset_id parameter", http.StatusBadRequest)
 		return
 	}
+	fmt.Println("Receive asset ID:", assetID)
 
 	asset := addAsset(assetID)
-	fmt.Println("Adding asset", assetID)
+	/*
+		response := APIResponse{
+			Message: "Asset added",
+			Data:    asset,
+		}
 
-	response := APIResponse{
-		Message: "Asset added",
-		Data:    asset,
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	*/
+
+	type responseStruct struct {
+		Owner string `json:"Owner"`
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	// Set the content type to JSON
+	//w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	// Create a sample response
+	response := responseStruct{
+		Owner: asset.Owner,
+	}
+
+	// Send the response as JSON
 	json.NewEncoder(w).Encode(response)
+
 }
 
 func handleStartAuction(w http.ResponseWriter, r *http.Request) {
@@ -83,12 +116,14 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	asset := addAsset(assetID)
-	fmt.Println("Adding asset", assetID)
-
 	fmt.Println("Starting auction")
 	fmt.Println("[ethereum] Deploying auction")
 	ethAddr := deployCrossChainAuction(ethClient)
+	// Make ethAddr different from quorumAddr
+	//time.Sleep(3 * time.Second)
+
+	asset := addAsset(assetID)
+	fmt.Println("Adding asset", assetID)
 
 	fmt.Println("[quorum] Deploying auction")
 	quorumAddr := deployCrossChainAuction(quorumClient)
@@ -98,7 +133,6 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 
 	response := APIResponse{
 		Message: "Auction started",
-		Data:    myAuction,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -129,6 +163,9 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
+
+	// Start the server
+
 	//fmt.Println("[fabric] Adding asset")–
 	/*
 		fmt.Println("[fabric] Adding asset")
@@ -154,7 +191,7 @@ func addAsset(id string) *auction.Asset {
 	//time.Sleep(3 * time.Second)
 	asset, err := assetClient.GetAsset(id)
 	check(err)
-	//fmt.Println("Asset added, owner: ", asset.Owner)
+	fmt.Println("Asset added, owner: ", asset.Owner)
 	return asset
 }
 
@@ -167,7 +204,7 @@ func startAuction(assetID, ethAddr, quorumAddr string) *auction.Auction {
 	}
 	_, err := assetClient.StartAuction(args)
 	check(err)
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
 	fmt.Println("Started auction for asset")
 
 	auctionID, err := assetClient.GetLastAuctionID()
