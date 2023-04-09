@@ -28,10 +28,10 @@
 
     <br>
     <h2>Auction Information</h2>
-    <p>Name: <span id="auction-name"></span> ID: <span id="auction-id"></span></p>
+    <p>Asset ID: <span id="asset-id"></span> Auction ID: <span id="auction-id"></span></p>
     <p>Description:</p>
     <div id="auction-description" class="description-container"></div>
-    <p>NFT Type: <span id="nft-type"></span> Address: <span id="blockchain-address"></span></p>
+
     <p>Top Bid: <span id="top-bid"></span></p>
     <p>Conclusion Time: <span id="conclusion-time"></span></p>
     <p>Active Status: <span id="active-status"></span></p>
@@ -40,10 +40,25 @@
     <h3>Make a Bid</h3>
     <div id="bid-section">
       <form id="make-bid-form">
-        <label for="bidder-address">Address:</label>
-        <input type="text" id="bidder-address" name="address" required>
+        <label>Auction Contract Platform: </label>
+        <select id="client-option">
+          <option value="eth">Ethereum</option>
+          <option value="quo">Quorum</option>
+        </select>
         <br>
+        <label for="client-addr">Auction Address:</label>
+        <p id="client-addr">0x7c0E33EC42a1c7B37cA796B3Eb90F5F42386828F</p>
+        <br>
+        <label for="bidder-address">Bidder Address:</label>
+        <p id="bidder-address"></p>
 
+        <div id="load-key">
+          <label for="fileInput">Key File:</label>
+          <input type="file" id="fileInput" onchange="loadFile()" />
+        </div>
+
+
+        <br>
         <label for="bid-value">Bid Value:</label>
         <input type="number" id="bid-value" name="bid-value" required>
         <button type = "submit">Make Bid</button>

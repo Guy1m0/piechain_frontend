@@ -21,6 +21,7 @@ require (
 	github.com/philipjkim/kafka-brokers-go v0.0.0-20170113033100-cc4b76c706b4
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
+	github.com/rs/cors v1.8.3 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/status-im/keycard-go v0.0.0-20190424133014-d95853db0f48 // indirect

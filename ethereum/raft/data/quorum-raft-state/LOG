@@ -18,3 +18,46 @@
 21:50:28.662111 db@open done T·75.439917ms
 21:52:20.071618 db@close closing
 21:52:20.071699 db@close done T·81.209µs
+=============== Apr 9, 2023 (+08) ===============
+04:28:39.330379 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+04:28:39.330637 version@stat F·[1] S·135B[135B] Sc·[0.25]
+04:28:39.330652 db@open opening
+04:28:39.330703 journal@recovery F·1
+04:28:39.331189 journal@recovery recovering @3
+04:28:39.336251 memdb@flush created L0@5 N·5 S·158B "applied,v8":"applied,v4"
+04:28:39.336736 version@stat F·[2] S·293B[293B] Sc·[0.50]
+04:28:39.362807 db@janitor F·4 G·0
+04:28:39.363234 db@open done T·32.575459ms
+04:47:06.676552 db@close closing
+04:47:06.676754 db@close done T·200.75µs
+=============== Apr 9, 2023 (+08) ===============
+16:09:21.623575 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:09:21.623881 version@stat F·[2] S·293B[293B] Sc·[0.50]
+16:09:21.623894 db@open opening
+16:09:21.623936 journal@recovery F·1
+16:09:21.624376 journal@recovery recovering @6
+16:09:21.628981 memdb@flush created L0@8 N·4 S·155B "applied,v13":"applied,v10"
+16:09:21.629481 version@stat F·[3] S·448B[448B] Sc·[0.75]
+16:09:21.652279 db@janitor F·5 G·0
+16:09:21.652389 db@open done T·28.490167ms
+17:02:13.615606 db@close closing
+17:02:13.615821 db@close done T·212.917µs
+=============== Apr 9, 2023 (+08) ===============
+17:22:07.382893 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+17:22:07.383227 version@stat F·[3] S·448B[448B] Sc·[0.75]
+17:22:07.383237 db@open opening
+17:22:07.383273 journal@recovery F·1
+17:22:07.383677 journal@recovery recovering @9
+17:22:07.389135 memdb@flush created L0@11 N·20 S·263B "applied,v34":"applied,v15"
+17:22:07.389652 version@stat F·[4] S·711B[711B] Sc·[1.00]
+17:22:07.409325 db@janitor F·6 G·0
+17:22:07.409377 db@open done T·26.133459ms
+17:22:07.409417 table@compaction L0·4 -> L1·0 S·711B Q·35
+17:22:07.414475 table@build created L1@14 N·1 S·128B "applied,v34":"applied,v34"
+17:22:07.414957 version@stat F·[0 1] S·128B[0B 128B] Sc·[0.00 0.00]
+17:22:07.428016 table@compaction committed F-3 S-583B Ke·0 D·30 T·18.572291ms
+17:22:07.428493 table@remove removed @8
+17:22:07.428674 table@remove removed @5
+17:22:07.432467 table@remove removed @2
+21:11:30.456245 db@close closing
+21:11:30.456479 db@close done T·234.167µs
