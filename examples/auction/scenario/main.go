@@ -107,12 +107,10 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*
-		type responseStruct struct {
-			Quorum string `json:"Quorum"`
-			Eth    string `json:"Eth"`
-		}
-	*/
+	type responseStruct struct {
+		Quorum string `json:"Quorum"`
+		Eth    string `json:"Eth"`
+	}
 
 	asset := addAsset(assetID)
 	fmt.Println("Adding asset", assetID)
@@ -129,10 +127,6 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("[fabric] Creating auction")
 	myAuction = startAuction(asset.ID, ethAddr, quorumAddr)
 
-	type responseStruct struct {
-		Owner string `json:"Owner"`
-	}
-
 	// Set the content type to JSON
 	//w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -140,8 +134,10 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 
 	// Create a sample response
 	response := responseStruct{
-		Owner: quorumAddr,
+		Quorum: quorumAddr,
+		Eth:    ethAddr,
 	}
+
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -161,7 +157,7 @@ func main() {
 	//var asset *auction.Asset
 	//var myAuction *auction.Auction
 
-	fmt.Println("Start to listening")
+	//fmt.Println("Start to listening")
 	startHTTPServer()
 	//fmt.Println("[fabric] Adding asset")
 
@@ -215,7 +211,7 @@ func startAuction(assetID, ethAddr, quorumAddr string) *auction.Auction {
 
 	auctionID, err := assetClient.GetLastAuctionID()
 	check(err)
-	fmt.Println("AuctionID: ", auctionID)
+	//fmt.Println("AuctionID: ", auctionID)
 
 	a, err := assetClient.GetAuction(auctionID)
 	check(err)
