@@ -79,15 +79,6 @@ func handleAddAsset(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Receive asset ID:", assetID)
 
 	asset := addAsset(assetID)
-	/*
-		response := APIResponse{
-			Message: "Asset added",
-			Data:    asset,
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-	*/
 
 	type responseStruct struct {
 		Owner string `json:"Owner"`
@@ -96,7 +87,6 @@ func handleAddAsset(w http.ResponseWriter, r *http.Request) {
 	// Set the content type to JSON
 	//w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	// Create a sample response
@@ -105,6 +95,7 @@ func handleAddAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the response as JSON
+	fmt.Println("Sending response:", response)
 	json.NewEncoder(w).Encode(response)
 
 }
@@ -116,14 +107,21 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	/*
+		type responseStruct struct {
+			Quorum string `json:"Quorum"`
+			Eth    string `json:"Eth"`
+		}
+	*/
+
+	asset := addAsset(assetID)
+	fmt.Println("Adding asset", assetID)
+
 	fmt.Println("Starting auction")
 	fmt.Println("[ethereum] Deploying auction")
 	ethAddr := deployCrossChainAuction(ethClient)
 	// Make ethAddr different from quorumAddr
-	//time.Sleep(3 * time.Second)
-
-	asset := addAsset(assetID)
-	fmt.Println("Adding asset", assetID)
+	//time.Sleep(3 * time.Second
 
 	fmt.Println("[quorum] Deploying auction")
 	quorumAddr := deployCrossChainAuction(quorumClient)
@@ -131,11 +129,19 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("[fabric] Creating auction")
 	myAuction = startAuction(asset.ID, ethAddr, quorumAddr)
 
-	response := APIResponse{
-		Message: "Auction started",
+	type responseStruct struct {
+		Owner string `json:"Owner"`
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	// Set the content type to JSON
+	//w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	// Create a sample response
+	response := responseStruct{
+		Owner: quorumAddr,
+	}
 	json.NewEncoder(w).Encode(response)
 }
 
