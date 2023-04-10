@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -49,6 +50,7 @@ func startHTTPServer() {
 
 	mux.HandleFunc("/api/add-asset", handleAddAsset)
 	mux.HandleFunc("/api/start-auction", handleStartAuction)
+	mux.HandleFunc("/api/add-bid", handleAddBid)
 
 	// Enable CORS
 	c := cors.New(cors.Options{
@@ -138,6 +140,54 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 		Eth:    ethAddr,
 	}
 
+	json.NewEncoder(w).Encode(response)
+}
+
+func handleAddBid(w http.ResponseWriter, r *http.Request) {
+	platform := r.URL.Query().Get("platform")
+	filename := r.URL.Query().Get("filename")
+	amountStr := r.URL.Query().Get("amount")
+	auctionAddr := r.URL.Query().Get("address")
+
+	if filename == "" || platform == "" || amountStr == "" {
+		http.Error(w, "Missing platform, bidder, or amount parameters", http.StatusBadRequest)
+		return
+	}
+	//fmt.Println("Received auction ID:", auctionID)
+	//fmt.Println("Received bidder:", bidder)
+	fmt.Println("Received amount:", amountStr)
+
+	amount, err := strconv.ParseInt(amountStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid amount value", http.StatusBadRequest)
+		return
+	}
+
+	if platform == "eth" {
+		bidAuction(ethClient, auctionAddr, "../../keys/"+filename, amount)
+	} else if platform == "quo" {
+		bidAuction(quorumClient, auctionAddr, "../../keys/"+filename, amount)
+	} else {
+		http.Error(w, "Invalid platform", http.StatusBadRequest)
+		return
+	}
+
+	// Add your logic to process the bid here
+
+	type responseStruct struct {
+		Status string `json:"status"`
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	// Create a sample response
+	response := responseStruct{
+		Status: "Bid added successfully",
+	}
+
+	// Send the response as JSON
+	//fmt.Println("Sending response:", response)
 	json.NewEncoder(w).Encode(response)
 }
 
