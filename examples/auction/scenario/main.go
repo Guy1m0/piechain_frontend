@@ -51,6 +51,7 @@ func startHTTPServer() {
 	mux.HandleFunc("/api/add-asset", handleAddAsset)
 	mux.HandleFunc("/api/start-auction", handleStartAuction)
 	mux.HandleFunc("/api/add-bid", handleAddBid)
+	mux.HandleFunc("/api/end-auction", handleEndAuction)
 
 	// Enable CORS
 	c := cors.New(cors.Options{
@@ -112,6 +113,7 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 	type responseStruct struct {
 		Quorum string `json:"Quorum"`
 		Eth    string `json:"Eth"`
+		ID     int    `json:"ID"`
 	}
 
 	asset := addAsset(assetID)
@@ -138,6 +140,7 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 	response := responseStruct{
 		Quorum: quorumAddr,
 		Eth:    ethAddr,
+		ID:     myAuction.ID,
 	}
 
 	json.NewEncoder(w).Encode(response)
@@ -187,6 +190,40 @@ func handleAddBid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the response as JSON
+	//fmt.Println("Sending response:", response)
+	json.NewEncoder(w).Encode(response)
+}
+
+func handleEndAuction(w http.ResponseWriter, r *http.Request) {
+	assetID := r.URL.Query().Get("asset_id")
+	auctionIDStr := r.URL.Query().Get("auction_id")
+
+	if assetID == "" || auctionIDStr == "" {
+		http.Error(w, "Missing asset_id or auction_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	auctionID, err := strconv.Atoi(auctionIDStr)
+	if err != nil {
+		http.Error(w, "Invalid auction_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println("Ending auction for asset ID:", assetID, "and auction ID:", auctionID)
+
+	endAuction(assetID, auctionID)
+
+	type responseStruct struct {
+		Status string `json:"message"`
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	response := responseStruct{
+		Status: "Auction ended successfully.",
+	}
+
 	//fmt.Println("Sending response:", response)
 	json.NewEncoder(w).Encode(response)
 }
@@ -268,14 +305,14 @@ func startAuction(assetID, ethAddr, quorumAddr string) *auction.Auction {
 	return a
 }
 
-func endAuction(a *auction.Auction) {
-	_, err := assetClient.EndAuction(a.AssetID)
+func endAuction(assetID string, auctionID int) {
+	_, err := assetClient.EndAuction(assetID)
 	check(err)
 
 	for {
-		time.Sleep(1 * time.Second)
-		a, err = assetClient.GetAuction(a.ID)
+		a, err := assetClient.GetAuction(auctionID)
 		check(err)
+		time.Sleep(1 * time.Second)
 		if a.Status == "Ended" {
 
 			fmt.Println("Auction Ended")
@@ -289,6 +326,7 @@ func endAuction(a *auction.Auction) {
 
 			break
 		}
+
 	}
 }
 
@@ -302,6 +340,7 @@ func bidAuction(client *ethclient.Client, addrHex, keyfile string, value int64) 
 	check(err)
 	printTxStatus(success)
 	if !success {
+		fmt.Println()
 		panic("failed to bid auction")
 	}
 	auctionSession.TransactOpts.Value = big.NewInt(0)
