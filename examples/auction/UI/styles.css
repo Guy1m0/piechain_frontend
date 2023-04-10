@@ -10,12 +10,14 @@
     color: #333;
   }
   
+  /*
   header {
     background-color: #e0e0e0;
     padding: 20px;
     text-align: center;
   }
-  
+  */
+
   header h1 {
     color: #333;
   }
@@ -32,7 +34,8 @@
   .create-auction-btn,
   .add-auction-btn,
   .view-btn,
-  .submit-btn {
+  .submit-btn,
+  .end-auction-btn {
     background-color: #4CAF50;
     color: #FFFFFF;
     border: none;
@@ -47,7 +50,8 @@
   .create-auction-btn:hover,
   .add-auction-btn:hover,
   .view-btn:hover,
-  .submit-btn:hover {
+  .submit-btn:hover,
+  .end-auction-btn:hover {
     background-color: #2E7D32;
   }
   
@@ -138,4 +142,49 @@
     overflow: auto;
     white-space: pre-wrap;
   }
+  
+  header {
+    background-color: #e0e0e0;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+  }
+
+  .corner-div {
+    background-color: #f5f5f5;
+    padding: 10px;
+    position: absolute;
+    top: 0;
+    right: 20px;
+    transform: translateY(0);
+    border-radius: 5px;
+    max-width: 20%;
+  }
+  
+
+
+
+  .corner-div label,
+  .corner-div p {
+    display: inline;
+  }
+
+  .real-time-corner {
+    position: fixed;
+    left: 10px;
+    bottom: 10px;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 3px;
+  }
+  
+  button.end-auction-btn:disabled {
+    background-color: #cccccc;
+    color: #888888;
+    cursor: not-allowed;
+  }
+  
   

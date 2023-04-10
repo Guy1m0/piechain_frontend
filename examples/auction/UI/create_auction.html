@@ -61,23 +61,20 @@
       <button type="submit" class="submit-btn">Create Auction</button>
    
     </form>   
+    
   </main>
+  <div id="real-time" class="real-time-corner"></div>
   <script src="script.js"></script>
   <script>
-    /*
-    const userType = sessionStorage.getItem("userType");
-  
-    if (!userType) {
-      //alert("Please log in to access this page.");
-      window.location.href = "login.html";
-      // Replace with "bidder" for index.html
-    } else if (userType !== "auctioneer" ) {
-      alert("You do not have permission to access this page.");
-      window.location.href = "index.html"; // Redirect to appropriate page
+    function updateRealTime() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString();
+      const realTimeElement = document.getElementById('real-time');
+      realTimeElement.textContent = timeString;
     }
-    */
+
+    setInterval(updateRealTime, 1000);
   </script>
-  
 </body>
 </html>
 
