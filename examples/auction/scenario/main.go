@@ -123,12 +123,12 @@ func handleStartAuction(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("[ethereum] Deploying auction")
 	ethAddr := deployCrossChainAuction(ethClient)
 	// Make ethAddr different from quorumAddr
-	//time.Sleep(3 * time.Second
-
+	//time.Sleep(5 * time.Second)
+	deployCrossChainAuction(ethClient)
 	fmt.Println("[quorum] Deploying auction")
 	quorumAddr := deployCrossChainAuction(quorumClient)
 
-	fmt.Println("[fabric] Creating auction")
+	fmt.Println("[fabric] Creating Managing Smart Contract")
 	myAuction = startAuction(asset.ID, ethAddr, quorumAddr)
 
 	// Set the content type to JSON
@@ -310,9 +310,10 @@ func endAuction(assetID string, auctionID int) {
 	check(err)
 
 	for {
+		time.Sleep(1 * time.Second)
 		a, err := assetClient.GetAuction(auctionID)
 		check(err)
-		time.Sleep(1 * time.Second)
+
 		if a.Status == "Ended" {
 
 			fmt.Println("Auction Ended")
