@@ -314,7 +314,7 @@ function updateBidderAddressDisplay() {
   
     bidElement.innerHTML = `
       <p>Bid #${bid.id}</p>
-      <p>Bidder Platfrom: ${bid.platform} </p>
+      <p>Bidder Platform: ${bid.platform} </p>
       <p>Address: ${bid.bidder}</p>
       <p>Amount: $${bid.amount}</p>
       <p>Timestamp: ${bid.timestamp}</p>

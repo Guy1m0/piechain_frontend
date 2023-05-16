@@ -1,8 +1,8 @@
 {
-  "Token1Address": "0x59c677ef9f2d89bce69c505a663c14172168a3d9",
-  "Token2Address": "0x1f988468db6df5685d7034bac1c7d968bc06c366",
-  "Amm1Address": "0xd39f7fa3482baf9ae07cb26722a7b19a4a73c2fd",
-  "Amm2Address": "0xa232647bdc70137648223c3f1a2c0706c98df57f",
+  "Token1Address": "0x1377a9f3f7b5984d7653133be2955583f3858373",
+  "Token2Address": "0x3d3ea2baaf1f8cb9cd6167dd2a22eae692f6bc3c",
+  "Amm1Address": "0x7034fabec4344ac5fc76a918bbde2543c235434b",
+  "Amm2Address": "0x11285cbbdaee1f046460a387d9a5f0d2352ddaba",
   "FabricTokenName": "token1",
   "Exchange": "0xac5580ad28a3c0e044a52541785bfd34c753d3bf",
   "Lender": "0xd0a73fe9d44184e9f1264ce2097064212e67ebfe",
